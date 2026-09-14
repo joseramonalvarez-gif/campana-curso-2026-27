@@ -748,7 +748,10 @@ body.edicion .tarjeta:active{cursor:grabbing}
       var t = porId(f.tarea_id);
       if (!t) return; // una tarea en la base que ya no está en el documento
       if (colocar(t, f.columna)) cambios++;
-      if (f.movido_el && (!ultimo || f.movido_el > ultimo)) ultimo = f.movido_el;
+      // Solo cuenta como movimiento lo que movió una persona. Las filas que
+      // nunca ha tocado nadie llevan fecha de siembra y dirían que hay
+      // actividad donde no la hay.
+      if (f.movido_por && f.movido_el && (!ultimo || f.movido_el > ultimo)) ultimo = f.movido_el;
       t.el.dataset.movidoPor = f.movido_por || "";
       t.el.dataset.movidoEl = f.movido_el || "";
     });
