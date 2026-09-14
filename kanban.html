@@ -152,7 +152,7 @@ footer{border-top:1px solid var(--linea);margin-top:2.5rem}
       <p><strong>Pincha en cualquier tarjeta</strong> y se abre con todo el detalle: para qué sirve, de qué depende, qué hay que hacer exactamente y en qué documento está la información. Se cierra con la X, pinchando fuera o con la tecla Escape.</p>
       <p><strong>Los botones de arriba filtran por persona.</strong> Pincha tu nombre y el tablero se queda solo con tus tareas. «Todas» lo devuelve entero.</p>
       <p><strong>Empieza por la columna Bloqueado.</strong> Ahí están las decisiones que tienen parado al resto: mientras no se resuelvan, producir otras cosas no adelanta la campaña.</p>
-      <p class="ayuda__ojo"><strong>Este tablero es una foto, no se mueve solo.</strong> No hace falta que lo actualicéis ni que arrastréis nada: no se puede, y no pasa nada. Refleja la situación del día en que se hizo. <strong>El estado real se pone al día en la revisión de los lunes</strong>, y de ahí sale el tablero actualizado. Lo que sí hace falta es que cada uno llegue al lunes sabiendo qué ha terminado, qué tiene a medias y qué le ha bloqueado.</p>
+      <p class="ayuda__ojo"><strong>Este tablero se mueve, y lo que muevas lo ve todo el equipo.</strong> Pulsa <em>Quiero mover tarjetas</em>, di quién eres y escribe la clave que os pasó José Ramón. A partir de ahí, arrastra una tarjeta a otra columna, o ábrela y usa <em>Mover a</em> si estás en el móvil. Queda registrado quién la movió y cuándo, que es justo lo que se lee en la revisión de los lunes. <strong>Mover una tarjeta no es un trámite: es la señal de que algo ha avanzado.</strong> Si el tablero no se mueve en toda una semana, eso también dice algo.</p>
     </div>
   </section>
 
@@ -529,7 +529,555 @@ function filtrar(f){
 }
 filtros.forEach(function(b){ b.addEventListener("click",function(){ filtrar(b.dataset.f); }); });
 filtrar("todas");
+// Lo expone para la capa de estado compartido. Ver publicacion/kanban_sync.js
+window.__kanban={COLS:COLS,tarjetas:tarjetas,filtrar:filtrar};
 })();
 </script>
 
+
+<style>
+/* Estilos de la capa de estado compartido del Kanban.
+   Usan los mismos tokens de marca que el documento, para que no se note
+   que es una capa añadida. */
+
+.sync{
+  display:flex; align-items:flex-start; gap:.7rem; flex-wrap:wrap;
+  border:1px solid var(--linea-suave); border-radius:var(--r);
+  background:var(--gris-claro); padding:.8rem 1.05rem; margin:0 0 1.2rem;
+  font-family:var(--util); font-size:.82rem; line-height:1.5; color:var(--gris-medio);
+}
+.sync b{color:var(--negro); font-weight:600}
+.sync__txt{flex:1; min-width:210px}
+.sync__punto{
+  width:9px; height:9px; border-radius:50%; background:var(--gris-medio);
+  flex:none; margin-top:.42rem;
+}
+.sync[data-estado="ok"] .sync__punto{background:#2E9E5B}
+.sync[data-estado="caido"]{background:var(--tinte); border-color:var(--amarillo)}
+.sync[data-estado="caido"] .sync__punto{background:var(--amarillo)}
+.sync[data-estado="cargando"] .sync__punto{opacity:.45}
+.sync__aviso{
+  display:block; margin-top:.4rem; padding-top:.4rem;
+  border-top:1px solid var(--linea); color:var(--negro); font-weight:600;
+}
+.sync__btn{
+  font-family:var(--util); font-weight:600; font-size:.74rem;
+  background:var(--negro); color:var(--blanco); border:1.5px solid var(--negro);
+  padding:.4rem .9rem; border-radius:999px; cursor:pointer; white-space:nowrap;
+  transition:background .16s ease, color .16s ease;
+}
+.sync__btn:hover{background:transparent; color:var(--negro)}
+.sync__btn:focus-visible{outline:2px solid var(--amarillo); outline-offset:2px}
+
+/* En modo edición se nota que las tarjetas se pueden coger. */
+body.edicion .tarjeta{cursor:grab}
+body.edicion .tarjeta:active{cursor:grabbing}
+.tarjeta--arr{opacity:.4}
+.tarjeta--mov{border-color:var(--amarillo) !important; box-shadow:0 0 0 2px var(--tinte)}
+.col__lista--dest{
+  outline:2px dashed var(--amarillo); outline-offset:3px; border-radius:8px;
+  min-height:44px;
+}
+
+/* Fila de «Mover a» dentro de la ficha: el camino que funciona en el móvil
+   y con teclado, no solo arrastrando. */
+.mover{
+  grid-column:1/-1; background:var(--gris-claro);
+  border:1px solid var(--linea-suave); border-radius:10px; padding:.75rem .9rem;
+}
+.mover > b{
+  font-family:var(--util); font-size:.6rem; text-transform:uppercase;
+  letter-spacing:.09em; color:var(--gris-medio); display:block;
+  margin-bottom:.5rem; font-weight:600;
+}
+.mover__bs{display:flex; flex-wrap:wrap; gap:.4rem}
+.mover__b{
+  font-family:var(--util); font-weight:600; font-size:.74rem;
+  background:var(--blanco); border:1px solid var(--linea); color:var(--negro);
+  padding:.42rem .8rem; border-radius:999px; cursor:pointer;
+  transition:border-color .16s ease, background .16s ease;
+}
+.mover__b:hover{border-color:var(--negro)}
+.mover__b:focus-visible{outline:2px solid var(--amarillo); outline-offset:2px}
+.mover__b--aqui{background:var(--amarillo); border-color:var(--amarillo); cursor:default}
+.mover__no{font-size:.8rem; color:var(--gris-medio); margin:0}
+
+/* Ventana de acceso. */
+.acc{
+  position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.45);
+  display:flex; align-items:center; justify-content:center; padding:1.2rem;
+}
+.acc__caja{
+  background:var(--blanco); border-radius:var(--r); padding:1.5rem 1.6rem;
+  width:100%; max-width:410px; box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+.acc__caja h3{font-size:1.15rem; margin-bottom:.5rem}
+.acc__p{font-size:.86rem; color:var(--gris-medio); margin-bottom:1.1rem}
+.acc__l{
+  font-family:var(--util); font-size:.62rem; text-transform:uppercase;
+  letter-spacing:.09em; color:var(--gris-medio); font-weight:600;
+  display:block; margin-bottom:.3rem;
+}
+.acc__c{
+  width:100%; font-family:var(--texto); font-size:.95rem;
+  border:1px solid var(--linea); border-radius:8px;
+  padding:.55rem .7rem; margin-bottom:.9rem; background:var(--blanco); color:var(--negro);
+}
+.acc__c:focus-visible{outline:2px solid var(--amarillo); outline-offset:1px}
+.acc__err{
+  font-size:.83rem; color:var(--negro); background:var(--tinte);
+  border-left:3px solid var(--amarillo); padding:.5rem .7rem;
+  border-radius:6px; margin:0 0 .9rem;
+}
+.acc__pie{display:flex; gap:.5rem; justify-content:flex-end}
+.acc__b{
+  font-family:var(--util); font-weight:600; font-size:.78rem;
+  background:var(--negro); color:var(--blanco); border:1.5px solid var(--negro);
+  padding:.5rem 1.1rem; border-radius:999px; cursor:pointer;
+}
+.acc__b:hover{background:transparent; color:var(--negro)}
+.acc__b:disabled{opacity:.5; cursor:default}
+.acc__b--n{background:transparent; color:var(--gris-medio); border-color:var(--linea)}
+.acc__b--n:hover{color:var(--negro); background:transparent}
+
+@media print{ .sync,.mover,.acc{display:none !important} }
+</style>
+<script>
+/* Estado compartido del Kanban de la campaña.
+ *
+ * El documento de origen no cambia: sigue siendo una foto con las 57 tarjetas
+ * en su columna de partida. Esta capa se monta encima y hace tres cosas:
+ *   1. Lee de la base de datos en qué columna está hoy cada tarea y lo aplica.
+ *   2. Deja mover tarjetas a quien tenga la clave del equipo.
+ *   3. Si la base de datos no responde, lo dice y se queda en solo lectura,
+ *      mostrando la versión de origen. Nunca enseña un tablero que miente.
+ *
+ * La clave no está aquí: la teclea la persona y viaja como cabecera. Quien
+ * tenga la dirección ve el tablero, pero sin la clave no lo puede mover.
+ */
+(function () {
+  "use strict";
+
+  var API = "https://boqazpacrnhqwerutkvn.supabase.co/rest/v1";
+  var KEY = "sb_publishable_gcVQYEPjcH-b001O7rd2MQ_PHeIpVgw";
+  var CADENCIA = 25000; // cada cuánto se vuelve a preguntar por el estado
+
+  var K = window.__kanban;
+  if (!K) return; // sin los datos del tablero no hay nada que sincronizar
+
+  var LS_NOMBRE = "proeduco.kanban.nombre";
+  var LS_CLAVE = "proeduco.kanban.clave";
+
+  // El navegador puede tener el almacenamiento bloqueado: nunca debe romper.
+  function guardado(k) {
+    try { return window.localStorage.getItem(k) || ""; } catch (e) { return ""; }
+  }
+  function guardar(k, v) {
+    try { if (v) window.localStorage.setItem(k, v); else window.localStorage.removeItem(k); } catch (e) {}
+  }
+
+  var nombre = guardado(LS_NOMBRE);
+  var clave = guardado(LS_CLAVE);
+  var editando = false;
+  var ultimo = null; // fecha del último movimiento conocido
+  var arrastrando = null;
+
+  // ---------------------------------------------------------------- red ---
+
+  function pedir(ruta, opciones) {
+    var o = opciones || {};
+    var cab = { apikey: KEY, "Content-Type": "application/json" };
+    if (o.clave) cab["x-clave-equipo"] = o.clave;
+    return fetch(API + ruta, {
+      method: o.metodo || "GET",
+      headers: cab,
+      body: o.cuerpo ? JSON.stringify(o.cuerpo) : undefined,
+      cache: "no-store"
+    }).then(function (r) {
+      return r.text().then(function (t) {
+        var d = null;
+        try { d = t ? JSON.parse(t) : null; } catch (e) {}
+        if (!r.ok) {
+          var err = new Error((d && d.message) || ("HTTP " + r.status));
+          err.codigo = d && d.code;
+          throw err;
+        }
+        return d;
+      });
+    });
+  }
+
+  function leerEstado() {
+    return pedir("/kanban_estado?select=tarea_id,columna,movido_por,movido_el");
+  }
+
+  function mover(id, columna, quien, laClave) {
+    return pedir("/rpc/mover_tarea", {
+      metodo: "POST",
+      clave: laClave,
+      cuerpo: { p_tarea: id, p_columna: columna, p_quien: quien }
+    });
+  }
+
+  // ------------------------------------------------------------ tablero ---
+
+  function porId(id) {
+    for (var i = 0; i < K.tarjetas.length; i++) {
+      if (K.tarjetas[i].d.id === id) return K.tarjetas[i];
+    }
+    return null;
+  }
+
+  function filtroActivo() {
+    var b = document.querySelector('.filtro[aria-pressed="true"]');
+    return b ? b.dataset.f : "todas";
+  }
+
+  function colocar(t, columna) {
+    var lista = document.getElementById("l-" + columna);
+    if (!lista || t.d.c === columna) { t.d.c = columna; return false; }
+    lista.appendChild(t.el);
+    t.d.c = columna;
+    return true;
+  }
+
+  /* Vuelca en el tablero lo que dice la base de datos. */
+  function aplicar(filas) {
+    var cambios = 0;
+    filas.forEach(function (f) {
+      var t = porId(f.tarea_id);
+      if (!t) return; // una tarea en la base que ya no está en el documento
+      if (colocar(t, f.columna)) cambios++;
+      if (f.movido_el && (!ultimo || f.movido_el > ultimo)) ultimo = f.movido_el;
+      t.el.dataset.movidoPor = f.movido_por || "";
+      t.el.dataset.movidoEl = f.movido_el || "";
+    });
+    K.filtrar(filtroActivo());
+    return cambios;
+  }
+
+  // ---------------------------------------------------------------- voz ---
+
+  var barra, texto, accion;
+
+  function crearBarra() {
+    barra = document.createElement("div");
+    barra.className = "sync";
+    barra.innerHTML =
+      '<span class="sync__punto"></span>' +
+      '<span class="sync__txt"></span>' +
+      '<button type="button" class="sync__btn"></button>';
+    var ancla = document.querySelector(".barra-f");
+    if (ancla && ancla.parentNode) ancla.parentNode.insertBefore(barra, ancla.nextSibling);
+    else document.getElementById("tablero").parentNode.insertBefore(barra, document.getElementById("tablero"));
+    texto = barra.querySelector(".sync__txt");
+    accion = barra.querySelector(".sync__btn");
+    accion.addEventListener("click", function () {
+      if (editando) salir(); else pedirCredenciales();
+    });
+  }
+
+  function cuando(iso) {
+    if (!iso) return "";
+    var ms = Date.now() - new Date(iso).getTime();
+    var min = Math.round(ms / 60000);
+    if (min < 1) return "hace un momento";
+    if (min < 60) return "hace " + min + " min";
+    var h = Math.round(min / 60);
+    if (h < 24) return "hace " + h + (h === 1 ? " hora" : " horas");
+    var d = Math.round(h / 24);
+    return "hace " + d + (d === 1 ? " día" : " días");
+  }
+
+  function pintarBarra(estado, detalle) {
+    barra.dataset.estado = estado;
+    if (estado === "cargando") {
+      texto.textContent = "Cargando el estado del tablero…";
+      accion.hidden = true;
+    } else if (estado === "caido") {
+      texto.innerHTML = "<b>Sin conexión con el tablero compartido.</b> Estás viendo la " +
+        "versión de origen, en solo lectura: puede que alguien haya movido tarjetas y " +
+        "aquí no se vean. Vuelve a cargar la página en un rato.";
+      accion.hidden = true;
+    } else if (editando) {
+      texto.innerHTML = "Estás moviendo tarjetas como <b>" + esc(nombre) + "</b>. " +
+        "Arrastra una tarjeta a otra columna, o ábrela y usa «Mover a». " +
+        "Todos los del equipo lo ven al instante.";
+      accion.hidden = false;
+      accion.textContent = "Dejar de editar";
+    } else {
+      var c = ultimo ? " · último movimiento " + cuando(ultimo) : "";
+      texto.innerHTML = "<b>Tablero compartido</b>" + esc(c) +
+        ". Lo que ves es el estado real, el mismo para todos.";
+      accion.hidden = false;
+      accion.textContent = "Quiero mover tarjetas";
+    }
+    if (detalle) {
+      var d = document.createElement("span");
+      d.className = "sync__aviso";
+      d.textContent = detalle;
+      texto.appendChild(d);
+    }
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  // ------------------------------------------------------- credenciales ---
+
+  function nombresPosibles() {
+    var l = [];
+    Array.prototype.slice.call(document.querySelectorAll(".filtro")).forEach(function (b) {
+      if (b.dataset.f && b.dataset.f !== "todas") l.push(b.dataset.f);
+    });
+    return l;
+  }
+
+  function pedirCredenciales() {
+    var fondo = document.createElement("div");
+    fondo.className = "acc";
+    var ops = nombresPosibles().map(function (n) {
+      return '<option value="' + esc(n) + '"' + (n === nombre ? " selected" : "") + ">" + esc(n) + "</option>";
+    }).join("");
+    fondo.innerHTML =
+      '<div class="acc__caja" role="dialog" aria-modal="true" aria-label="Empezar a mover tarjetas">' +
+      '<h3>Para mover tarjetas</h3>' +
+      '<p class="acc__p">Hace falta saber quién mueve cada cosa, porque queda registrado y es ' +
+      'lo que se lee en la revisión del lunes.</p>' +
+      '<label class="acc__l" for="acc-n">Quién eres</label>' +
+      '<select id="acc-n" class="acc__c">' + ops + '<option value="__otro">Otra persona…</option></select>' +
+      '<input id="acc-otro" class="acc__c" type="text" placeholder="Tu nombre" hidden>' +
+      '<label class="acc__l" for="acc-c">Clave del equipo</label>' +
+      '<input id="acc-c" class="acc__c" type="password" autocomplete="off" placeholder="La que os pasó José Ramón">' +
+      '<p class="acc__err" hidden></p>' +
+      '<div class="acc__pie">' +
+      '<button type="button" class="acc__b acc__b--n" data-cerrar>Ahora no</button>' +
+      '<button type="button" class="acc__b" data-ok>Empezar</button>' +
+      "</div></div>";
+    document.body.appendChild(fondo);
+
+    var sel = fondo.querySelector("#acc-n");
+    var otro = fondo.querySelector("#acc-otro");
+    var pass = fondo.querySelector("#acc-c");
+    var err = fondo.querySelector(".acc__err");
+    var ok = fondo.querySelector("[data-ok]");
+
+    sel.addEventListener("change", function () {
+      otro.hidden = sel.value !== "__otro";
+      if (!otro.hidden) otro.focus();
+    });
+    function cerrar() { if (fondo.parentNode) fondo.parentNode.removeChild(fondo); }
+    fondo.querySelector("[data-cerrar]").addEventListener("click", cerrar);
+    fondo.addEventListener("click", function (e) { if (e.target === fondo) cerrar(); });
+    document.addEventListener("keydown", function esc2(e) {
+      if (e.key === "Escape") { cerrar(); document.removeEventListener("keydown", esc2); }
+    });
+
+    ok.addEventListener("click", function () {
+      var n = sel.value === "__otro" ? otro.value.trim() : sel.value;
+      var c = pass.value.trim();
+      err.hidden = true;
+      if (!n) { err.textContent = "Dinos quién eres."; err.hidden = false; return; }
+      if (!c) { err.textContent = "Falta la clave del equipo."; err.hidden = false; return; }
+      ok.disabled = true;
+      ok.textContent = "Comprobando…";
+      // Se valida moviendo una tarea a la columna en la que ya está: si la
+      // clave es buena responde bien, y no ensucia el historial.
+      var t = K.tarjetas[0];
+      mover(t.d.id, t.d.c, n, c).then(function () {
+        nombre = n; clave = c; editando = true;
+        guardar(LS_NOMBRE, n); guardar(LS_CLAVE, c);
+        cerrar();
+        modoEdicion(true);
+        pintarBarra("ok");
+      }).catch(function (e) {
+        ok.disabled = false;
+        ok.textContent = "Empezar";
+        err.textContent = e.codigo === "28000"
+          ? "Esa no es la clave. Pídesela a José Ramón."
+          : "No se ha podido comprobar: " + e.message;
+        err.hidden = false;
+      });
+    });
+    setTimeout(function () { pass.focus(); }, 30);
+  }
+
+  function salir() {
+    editando = false;
+    clave = "";
+    guardar(LS_CLAVE, "");
+    modoEdicion(false);
+    pintarBarra("ok");
+  }
+
+  // ------------------------------------------------------------ mover ---
+
+  function mueveTarjeta(id, destino) {
+    var t = porId(id);
+    if (!t || t.d.c === destino) return;
+    var origen = t.d.c;
+    colocar(t, destino);          // se mueve ya, para que responda al instante
+    K.filtrar(filtroActivo());
+    t.el.classList.add("tarjeta--mov");
+    mover(id, destino, nombre, clave).then(function (r) {
+      t.el.classList.remove("tarjeta--mov");
+      if (r && r[0]) { ultimo = r[0].movido_el; }
+      pintarBarra("ok");
+    }).catch(function (e) {
+      colocar(t, origen);          // no se pudo guardar: se deshace
+      K.filtrar(filtroActivo());
+      t.el.classList.remove("tarjeta--mov");
+      if (e.codigo === "28000") {
+        editando = false;
+        guardar(LS_CLAVE, "");
+        modoEdicion(false);
+        pintarBarra("ok", "La clave ha dejado de valer. La tarjeta no se ha movido.");
+      } else {
+        pintarBarra("ok", "No se ha podido guardar el movimiento. La tarjeta se ha quedado donde estaba.");
+      }
+    });
+  }
+
+  function modoEdicion(activo) {
+    document.body.classList.toggle("edicion", activo);
+    K.tarjetas.forEach(function (t) {
+      if (activo) t.el.setAttribute("draggable", "true");
+      else t.el.removeAttribute("draggable");
+    });
+    if (fichaControl) fichaControl();
+  }
+
+  // Arrastrar y soltar, para el ordenador.
+  function montarArrastre() {
+    document.addEventListener("dragstart", function (e) {
+      var t = e.target.closest ? e.target.closest(".tarjeta") : null;
+      if (!t || !editando) return;
+      arrastrando = t.dataset.id;
+      t.classList.add("tarjeta--arr");
+      try { e.dataTransfer.setData("text/plain", arrastrando); } catch (x) {}
+      e.dataTransfer.effectAllowed = "move";
+    });
+    document.addEventListener("dragend", function (e) {
+      var t = e.target.closest ? e.target.closest(".tarjeta") : null;
+      if (t) t.classList.remove("tarjeta--arr");
+      arrastrando = null;
+      Array.prototype.slice.call(document.querySelectorAll(".col__lista")).forEach(function (l) {
+        l.classList.remove("col__lista--dest");
+      });
+    });
+    Array.prototype.slice.call(document.querySelectorAll(".col__lista")).forEach(function (lista) {
+      lista.addEventListener("dragover", function (e) {
+        if (!editando || !arrastrando) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        lista.classList.add("col__lista--dest");
+      });
+      lista.addEventListener("dragleave", function () { lista.classList.remove("col__lista--dest"); });
+      lista.addEventListener("drop", function (e) {
+        if (!editando) return;
+        e.preventDefault();
+        lista.classList.remove("col__lista--dest");
+        var id = arrastrando || e.dataTransfer.getData("text/plain");
+        if (id) mueveTarjeta(id, lista.id.replace(/^l-/, ""));
+        arrastrando = null;
+      });
+    });
+    // Arrastrar abre la ficha en algunos navegadores: se evita.
+    document.addEventListener("click", function (e) {
+      var t = e.target.closest ? e.target.closest(".tarjeta") : null;
+      if (t && t.classList.contains("tarjeta--arr")) { e.stopPropagation(); }
+    }, true);
+  }
+
+  /* En el móvil arrastrar es un suplicio, y con teclado imposible. Dentro de
+     la ficha de cada tarjeta va siempre una fila de botones para moverla. */
+  var fichaControl = null;
+  function montarFicha() {
+    var caja = document.getElementById("ficha-caja");
+    if (!caja) return;
+    var actual = null;
+
+    function pintar() {
+      var viejo = caja.querySelector(".mover");
+      if (viejo) viejo.parentNode.removeChild(viejo);
+      if (!actual) return;
+      var campos = caja.querySelector(".ficha__campos");
+      if (!campos) return;
+      var d = document.createElement("div");
+      d.className = "mover";
+      if (!editando) {
+        d.innerHTML = '<b>Mover a</b><p class="mover__no">Para mover tarjetas hace falta la ' +
+          'clave del equipo. Ciérrala y pulsa «Quiero mover tarjetas».</p>';
+      } else {
+        var t = porId(actual);
+        var bs = K.COLS.map(function (c) {
+          var aqui = t && t.d.c === c.k;
+          return '<button type="button" class="mover__b' + (aqui ? " mover__b--aqui" : "") +
+            '" data-col="' + c.k + '"' + (aqui ? " disabled" : "") + ">" + esc(c.n) + "</button>";
+        }).join("");
+        d.innerHTML = "<b>Mover a</b><div class=\"mover__bs\">" + bs + "</div>";
+      }
+      campos.appendChild(d);
+      Array.prototype.slice.call(d.querySelectorAll(".mover__b")).forEach(function (b) {
+        b.addEventListener("click", function () {
+          mueveTarjeta(actual, b.dataset.col);
+          var f = document.getElementById("ficha");
+          if (f) f.hidden = true;
+        });
+      });
+    }
+    fichaControl = pintar;
+
+    // El manejador del documento ya ha rellenado la ficha cuando llega aquí,
+    // porque este se registra después.
+    document.addEventListener("click", function (e) {
+      var t = e.target.closest ? e.target.closest(".tarjeta") : null;
+      if (!t) return;
+      actual = t.dataset.id;
+      setTimeout(pintar, 0);
+    });
+  }
+
+  // --------------------------------------------------------- arranque ---
+
+  function refrescar() {
+    return leerEstado().then(function (filas) {
+      aplicar(filas || []);
+      if (barra.dataset.estado !== "ok") pintarBarra("ok");
+      else pintarBarra("ok");
+    }).catch(function () {
+      pintarBarra("caido");
+    });
+  }
+
+  crearBarra();
+  pintarBarra("cargando");
+  montarArrastre();
+  montarFicha();
+
+  refrescar().then(function () {
+    if (nombre && clave) {
+      // Ya tenía la sesión puesta de otra vez: se comprueba sin molestar.
+      var t = K.tarjetas[0];
+      mover(t.d.id, t.d.c, nombre, clave).then(function () {
+        editando = true;
+        modoEdicion(true);
+        pintarBarra("ok");
+      }).catch(function () {
+        guardar(LS_CLAVE, "");
+        clave = "";
+        pintarBarra("ok");
+      });
+    }
+  });
+
+  setInterval(function () {
+    if (document.visibilityState === "visible") refrescar();
+  }, CADENCIA);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") refrescar();
+  });
+})();
+</script>
 </html>
