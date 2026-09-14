@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<title>Mapa de embudos Proeduco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&family=Manrope:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --blanco:#FFFFFF; --negro:#000000; --amarillo:#E8C223;
+  --gris-medio:#808285; --gris-claro:#F6F6F6;
+  --linea:rgba(0,0,0,.10); --linea-suave:rgba(0,0,0,.06); --tinte:rgba(232,194,35,.08);
+  --sombra:0 1px 2px rgba(0,0,0,.04), 0 10px 30px rgba(0,0,0,.05);
+  --display:"Sarabun", Georgia, serif;
+  --texto:"Sarabun", -apple-system, "Segoe UI", sans-serif;
+  --util:"Manrope", -apple-system, "Segoe UI", sans-serif;
+  --max:1180px; --r:14px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.001ms !important}}
+body{margin:0;background:var(--blanco);color:var(--negro);font-family:var(--texto);font-size:16px;line-height:1.58;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,h5{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance;line-height:1.2}
+p{margin:0 0 .8rem}p:last-child{margin-bottom:0}
+.label{font-family:var(--util);font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.11em;color:var(--gris-medio)}
+.chip{display:inline-block;font-family:var(--util);font-weight:600;font-size:.62rem;text-transform:uppercase;letter-spacing:.09em;padding:.26em .7em;border-radius:999px;background:var(--amarillo);color:var(--negro);white-space:nowrap}
+.chip--n{background:var(--gris-claro);color:var(--gris-medio);border:1px solid var(--linea)}
+.chip--l{background:transparent;border:1.5px solid var(--amarillo)}
+
+.topbar{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.95);backdrop-filter:saturate(150%) blur(10px);border-bottom:1px solid var(--linea-suave)}
+.topbar__in{max-width:var(--max);margin:0 auto;padding:.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem}
+.topbar__logo{height:32px;width:auto;display:block}
+.topbar__code{font-family:var(--util);font-size:.7rem;letter-spacing:.06em;font-weight:600;color:var(--gris-medio);white-space:nowrap}
+
+.wrap{max-width:var(--max);margin:0 auto;padding:0 1.5rem 5rem}
+section{padding:2.3rem 0}
+section+section{border-top:1px solid var(--linea-suave)}
+.sec-head{margin-bottom:1.4rem}
+.sec-head .label{display:block;margin-bottom:.45rem}
+.sec-head h2{font-size:clamp(1.4rem,2.4vw,1.9rem);margin-bottom:.45rem}
+.sec-head .lede{color:var(--gris-medio);max-width:66ch;font-size:.98rem}
+
+.hero{padding:2.8rem 0 2rem}
+.hero__rule{width:60px;height:5px;background:var(--amarillo);border-radius:999px;margin-bottom:1.4rem}
+.hero h1{font-size:clamp(1.9rem,4.2vw,2.85rem);letter-spacing:-.02em;margin-bottom:.85rem;max-width:20ch}
+.hero__sub{font-size:1.05rem;color:var(--gris-medio);max-width:62ch}
+
+/* mapa */
+.fase{border:1px solid var(--linea-suave);border-radius:var(--r);box-shadow:var(--sombra);overflow:hidden;margin-bottom:1rem}
+.fase__cab{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;padding:.85rem 1.25rem;background:var(--gris-claro);border-bottom:1px solid var(--linea-suave)}
+.fase__cab h3{font-size:.98rem}
+.fase__cab .t{font-family:var(--util);font-size:.73rem;color:var(--gris-medio);margin-left:auto}
+.bloques{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--linea-suave)}
+.bloque{background:var(--blanco);padding:1.1rem 1.2rem}
+.bloque__t{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.85rem;flex-wrap:wrap}
+.bloque__t h4{font-size:.82rem;font-family:var(--util);font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.bloque__t span{font-family:var(--util);font-size:.7rem;color:var(--gris-medio)}
+.fila{display:grid;gap:.5rem}
+.emb{display:grid;grid-template-columns:28px 1fr auto;gap:.8rem;align-items:center;width:100%;text-align:left;background:var(--blanco);border:1px solid var(--linea-suave);border-radius:10px;padding:.65rem .85rem;cursor:pointer;font-family:var(--texto);color:var(--negro);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.emb:hover{border-color:var(--negro);box-shadow:var(--sombra);transform:translateY(-1px)}
+.emb[aria-pressed="true"]{border-color:var(--amarillo);border-width:2px;background:var(--tinte)}
+.emb:focus-visible{outline:2px solid var(--amarillo);outline-offset:3px}
+.emb__n{width:25px;height:25px;border-radius:50%;background:var(--negro);color:var(--blanco);font-family:var(--util);font-weight:600;font-size:.72rem;display:grid;place-items:center}
+.emb[aria-pressed="true"] .emb__n{background:var(--amarillo);color:var(--negro)}
+.emb__n--x{background:var(--gris-claro);color:var(--gris-medio);border:1px solid var(--linea)}
+.emb__t{font-weight:600;font-size:.9rem;display:block;line-height:1.28}
+.emb__s{font-family:var(--util);font-size:.69rem;color:var(--gris-medio);display:block;margin-top:.12rem}
+.emb__p{font-family:var(--util);font-size:.64rem;color:var(--gris-medio);white-space:nowrap;text-align:right}
+.emb__p b{display:block;font-size:.88rem;color:var(--negro);font-weight:600;font-variant-numeric:tabular-nums}
+.transversal{border:1px solid var(--linea-suave);border-radius:var(--r);background:var(--gris-claro);padding:1.1rem 1.2rem}
+.tr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:.7rem}
+.tr{background:var(--blanco);border:1px solid var(--linea-suave);border-radius:10px;padding:.8rem .95rem}
+.tr h5{font-family:var(--util);font-size:.78rem;font-weight:600;margin:0 0 .28rem}
+.tr p{font-size:.79rem;color:var(--gris-medio);margin:0}
+
+/* ficha */
+.ficha[hidden]{display:none}
+.f-cab{border:1px solid var(--linea-suave);border-left:4px solid var(--amarillo);border-radius:var(--r);box-shadow:var(--sombra);padding:1.3rem 1.5rem;margin-bottom:1.3rem}
+.f-cab .label{display:block;margin-bottom:.35rem}
+.f-cab h3{font-size:1.35rem;margin-bottom:.5rem}
+.f-cab p{color:var(--gris-medio);font-size:.94rem;max-width:76ch;margin:0}
+.f-meta{display:flex;gap:.42rem;flex-wrap:wrap;margin-top:.9rem}
+
+.paso{display:grid;grid-template-columns:52px 1fr}
+.paso__rail{display:flex;flex-direction:column;align-items:center;padding-top:.2rem}
+.paso__n{width:32px;height:32px;border-radius:50%;background:var(--negro);color:var(--blanco);font-family:var(--util);font-weight:600;font-size:.82rem;display:grid;place-items:center;flex:none;z-index:2}
+.paso__linea{width:2px;flex:1;background:var(--linea);margin:.35rem 0 -.35rem}
+.paso:last-child .paso__linea{display:none}
+.paso__c{border:1px solid var(--linea-suave);border-radius:var(--r);box-shadow:var(--sombra);margin-bottom:.85rem;overflow:hidden;min-width:0}
+.paso__cab{padding:.9rem 1.2rem;border-bottom:1px solid var(--linea-suave);display:flex;align-items:baseline;gap:.75rem;flex-wrap:wrap}
+.paso__cab h4{font-size:1rem}
+.paso__cab .resp{margin-left:auto;font-family:var(--util);font-size:.7rem;color:var(--gris-medio)}
+.paso__cab .resp b{color:var(--negro);font-weight:600}
+
+.tri{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--linea-suave)}
+.celda{background:var(--blanco);padding:.8rem 1.2rem}
+.celda > b{font-family:var(--util);font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;color:var(--gris-medio);display:block;margin-bottom:.35rem;font-weight:600}
+.celda p{font-size:.86rem;margin:0}
+.mensaje{background:var(--gris-claro);border-top:1px solid var(--linea-suave);border-bottom:1px solid var(--linea-suave);padding:.9rem 1.2rem;display:grid;grid-template-columns:1fr auto;gap:1.2rem;align-items:start}
+.mensaje > div > b{font-family:var(--util);font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;color:var(--gris-medio);display:block;margin-bottom:.25rem;font-weight:600}
+.mensaje .txt{font-size:.9rem;font-style:italic;border-left:3px solid var(--amarillo);padding-left:.7rem}
+.mensaje .cta{font-family:var(--util);font-size:.82rem;font-weight:600;white-space:normal;max-width:230px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--linea-suave)}
+.paso__pie{background:var(--blanco);border-top:1px solid var(--linea-suave);padding:.8rem 1.2rem;display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.paso__pie > div > b{font-family:var(--util);font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;color:var(--gris-medio);display:block;margin-bottom:.35rem;font-weight:600}
+.pz{display:inline-block;font-family:var(--util);font-size:.67rem;font-weight:600;background:var(--amarillo);border-radius:5px;padding:.2em .5em;margin:0 .2rem .28rem 0}
+.pz--x{background:var(--gris-claro);color:var(--gris-medio);border:1px solid var(--linea);font-weight:400}
+.hz{display:inline-block;font-family:var(--util);font-size:.67rem;background:var(--blanco);border:1px solid var(--linea);border-radius:999px;padding:.2em .58em;margin:0 .2rem .28rem 0}
+.f-pie{border:1px solid var(--linea-suave);border-radius:var(--r);background:var(--gris-claro);padding:1.1rem 1.35rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:1rem;margin-top:.4rem}
+.f-pie div{font-size:.84rem}
+.f-pie strong{font-family:var(--util);font-size:.63rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gris-medio);display:block;margin-bottom:.2rem}
+
+.card{background:var(--blanco);border:1px solid var(--linea-suave);border-radius:var(--r);box-shadow:var(--sombra);padding:1.3rem}
+.card--n{background:var(--gris-claro);box-shadow:none}
+.card--a{border-left:4px solid var(--amarillo)}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:1rem}
+.card h3{font-size:.98rem;margin-bottom:.4rem}
+.card p{font-size:.88rem;color:var(--gris-medio)}
+.card p strong{color:var(--negro)}
+.nota{font-family:var(--util);font-size:.72rem;color:var(--gris-medio);margin-top:.7rem}
+.cambios{border:1px solid var(--linea-suave);border-radius:var(--r);overflow:hidden;box-shadow:var(--sombra)}
+.cb{display:grid;grid-template-columns:150px 1fr;gap:1.1rem;padding:.8rem 1.2rem;border-bottom:1px solid var(--linea-suave);align-items:baseline}
+.cb:last-child{border-bottom:none}
+.cb__k{font-family:var(--util);font-size:.76rem;font-weight:600}
+.cb__v{font-size:.89rem;color:var(--gris-medio)}
+.cb__v b{color:var(--negro);font-weight:600}
+
+footer{border-top:1px solid var(--linea)}
+.footer__in{max-width:var(--max);margin:0 auto;padding:1.6rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:space-between}
+.footer__l{display:flex;align-items:center;gap:.7rem}
+.footer__ico{height:24px;width:auto}
+.footer__t{font-family:var(--util);font-size:.7rem;color:var(--gris-medio);letter-spacing:.05em}
+
+@media (max-width:960px){
+  .bloques{grid-template-columns:1fr}
+  .tri,.duo,.paso__pie,.mensaje{grid-template-columns:1fr}
+  .mensaje .cta{max-width:none}
+  .emb{grid-template-columns:26px 1fr}
+  .emb__p{grid-column:2;text-align:left;margin-top:.15rem}
+  .cb{grid-template-columns:1fr;gap:.2rem}
+}
+@media print{
+  .topbar{display:none}
+  .ficha[hidden]{display:block !important}
+  .card,.fase,.paso__c,.transversal,.f-cab,.f-pie,.cambios{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+  body{font-size:9.5pt}
+  @page{size:A4 landscape;margin:10mm}
+  *{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+.navdoc{margin:1.5rem 0 0;border:1px solid rgba(0,0,0,.14);background:#fff}
+.navdoc__h{background:#000;color:#fff;padding:.62rem 1.05rem;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em}
+.navdoc__b{padding:.95rem 1.1rem}
+.navdoc p{margin:0 0 .5rem;font-size:.85rem;line-height:1.6}
+.navdoc p:last-child{margin-bottom:0}
+.navdoc .ojo{margin-top:.65rem;padding-top:.65rem;border-top:1px solid rgba(0,0,0,.10);color:#808285}
+
+</style>
+<style>
+.na-volver{background:#000;color:#fff;font-family:"Manrope",-apple-system,"Segoe UI",sans-serif;font-size:.78rem;font-weight:600;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.na-volver__in{max-width:1280px;margin:0 auto;padding:.58rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.na-volver a{color:#E8C223;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem}
+.na-volver a:hover{text-decoration:underline}
+.na-volver a:focus-visible{outline:2px solid #E8C223;outline-offset:3px}
+.na-volver span{color:rgba(255,255,255,.55);font-weight:500}
+@media (max-width:560px){.na-volver span{display:none}}
+@media print{.na-volver{display:none}}
+</style>
+<div class="na-volver"><div class="na-volver__in">
+<a href="./">&larr; Volver al índice de la entrega</a>
+<span>Campaña de curso escolar 2026/27 · Proeduco</span>
+</div></div>
+
+
+<header class="topbar">
+  <div class="topbar__in">
+    <img class="topbar__logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCACoAYADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqGeeG2hee4lWOKNSzu5wqgdST2FR3t5a6bZz6hf3MVvbW0bTTzSuFSKNRlmYngAAEk1+CH7cf7dHjv8Aag8caloeh65d6X8NNOuXg0nSIJGiW+RCQLu6A/1kj9Qp+WMEADO92AP3B0/43fBjV9YHh3SPi94LvdVLbBY22v2ktwW9PLWQtn8K7iv5V6/RT/gmX+3d438LfEjRP2f/AIq+J7rWvCXiWZNN0S41CYyTaRevxBGkjZYwyNiLyycIWQrgbgQD9lKKKKACvPNX/aD+Aug6ndaNrvxt8A6dqFjK0N1aXfiWzhmgkU4KujyhlI7giuJ/bY/aHt/2Z/2e/EXxAt541165T+yvD0TYO/UZwwjbB+8IwHmI7iIjvXxf+xz/AMEu/hl8UfgnpXxX/aFbxJdeI/GTNq0FvBqBtxBZSHMLP8pLySj96ST0kQYBByAff3/DTP7OH/RwXw1/8Kyw/wDjta/hL4w/CTx/qcmieAvil4S8R6jDCbmS00jXLa8mSIEAyGOJyQmSBkjGSPWvlv8A4dCfscf9Arxb/wCD1/8A4mve/wBnv9lv4MfsxaLqGifCXw01idXmWe/vbqdri6uiowivI3OxcnCjCgsxxliSAeu0UUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUVXurm3s7eW6u50hhgVpJZZGCqigZJJPQAd6AOR8aa78Pda1Nfgf4t1G3e+8b6JqQTS3bD3dhGqRXX04uB9RvIztOP5w/jT8MNY+C/xX8VfCvXd5u/DOqTWHmMuPPiDZimA9JIykg9nFfRnxS/bl1jX/ANvKw/aX0a6uJPD/AIT1aPT9HtlYgyaHGWilUA/dM8ck8hz0M3sK9j/4LG/CHTz4l8E/tNeERHc6P40sI9Lv7qAZjluI4/NtJs9/NtyQPa3FAH5tVb03Ub7R9RtdW0y5ktryymjubeaM4aORCGVx7ggGqlFAH9NfwI+J9l8aPg54N+KdhsCeJdHt76VE6RXBXE0X/AJRIn/Aa72vzq/4Iw/GD/hJvgx4l+Dl/dFrzwVqn26yRj0sb3LbVH+zOkzH/rsK+nP22P2h7f8AZn/Z78RfEC3njXXrlP7K8PRNg79RnDCNsH7wjAeYjuIiO9AHxZ+0HPcft7f8FAPD/wCzvpE0lz8OvhU8s3iKSJj5ckkbIb8kjuXENmv9197Dgmv1EtraCzt4rW0hjhhgURxRxqFVFAwAAOgA7V8W/wDBK79nm5+E/wACm+KPiy3lbxb8T5E1i4luMmWPT+TaoSecuHecnv5yA8rX21QAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFfDv/BVz9pH/hT3wDb4a+Hr7yfE3xI83Th5bYeDS0A+1ye28MkI9RLIR9yvtm8uraztZby8njht7dDLLLI4VUQDJYk9ABzmv52f22f2h7j9pj9oPxD8QLeeQ6BbSf2V4eibI2adCxEb4P3TIS8pHYykdqAPBq/Wv9nEr+25/wAE0PEvwLu2W78Y/D2I2OmBjmXzLcefppH90Mga1z6I9fkpX2d/wSm+OJ+E37UFh4T1O88rRfiLB/YE4ZsKLzO6zf6+ZmIf9dzQB8aSRvG7RSIVdTgqRgg+lMr6k/4KQ/A7/hR37VHia00+08nQ/Frf8JNpWBhQlyzGaMdhsnEwA7Js9a+W6APrP/gmH8Yf+FTftb+GLW9uvK0rxqknhe9yeN1wQbY/X7THCM+jGvqv9oC4uP29v+CgWgfs76RO9z8OvhU0k3iKSJj5UskbKb4kjuXENmPRvMYcE1+Vlhf3ul39vqmnXcttd2cqT288TlXikQgqykcgggEH2r9xP+CVn7O8/wAJPgQfib4qtZP+Es+Jzx6vcST5Msen8m0jJPOXDvMT385QeVoA+0be2gtII7W1hjhhhURxxooVVUDAAA6ADtViiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooqtd3VtZWs19eTxwW0CGWWWRwqRooyWJPAAAzmgD4p/4KsftE3Hwp+BifCnwpdOfFfxOZ9LjjgyZotMGBdMAOcyb0hA7iWTHK1+Q37QnwA8bfs2+PIPh34+SEalNo9jqwMQO3FxCGdB6+XKJYSehMRI61+gf7PFtcft9/8ABQDxB+0TrdvJcfDz4XyRLoMUynZIY3caemD0JcS3bjs2AeCK6H/gtV8Hv7T8E+CfjlptrmfRLuTw/qboOTbXAMsDN/spLHKPrOKAPyLq5pWp6homp2mtaTdSWt9YTx3VtPGcNFLGwZGB9QwB/CqdFAH6z/t76XYftc/sJfD/APay8NWkT6v4ahjutTSEZ8uCci3v4fU+VdRxkZ6Ish71+TFfqP8A8EiPiNovxD8A/Ev9kTx2ftWm6pYz6nZW7vzJaXEYtr6Jc9MboXAHeSQ1+c/xb+HOtfCH4neKPhh4gB+3+GNTuNOlfGBKI3ISVf8AZddrj2YUAen/ALEH7O8/7S/7Q3h7wJdWzv4fsm/tfxDIoOF0+EgvHnsZWKQg9jLntX9EUFvBaQR21vCkMMKhI40UKqoBgAAdABXxZ/wSo/Zu/wCFMfACP4ia/YGLxN8SPK1STemHg00A/Y4vbcrNMf8ArsoP3K+26ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAr4d/4Ks/tE3Pwr+BsXwl8K3Mh8WfE930uOODJmi00YFywA5zLuSADuJZMcrX2xeXdrY2s19e3MdvbW6NLNLKwVI0UZLMTwAAM5r8s/2dre6/b8/4KAeIP2itctpJ/h78MJIhoMMynYxjdxp6YPQlxLduOz4B4IoA+2f2Iv2eIf2Z/wBnrw94CureNNfvF/tbxDIuCW1GcAyJnuIlCRA9xFnvXUftQ/CSH46fs/8Ajn4WeUklzrekyiw3dFvosS2rfQTxxZ9s16rRQB/K5PDNbSvBcRtHJGxR0YYKkcEEdjUVfTX/AAUX+DLfBj9rHxjptpYtBpHiWf8A4SXSztwrRXZLyqvbCTidAB2QV8y0Aet/sq/Gq4/Z++P/AIM+KiSOtlpWopHqaJkmTT5QYrlcdz5TuV/2gp7V+n37WX7CEX7QX7Zfw0+JWkWYuPBnie0WbxldQcoY7AKUJcd7mJ4YFI6eWT2r8Zq/ok/YHvfHmo/sg/DG4+IlmYNUGirFBvJLyaejstlI2eha2EJ75GD3wAD32C3htII7a3hWKGFRHHGihVVAMAADoAKnoooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA8c/ai8Z/HjwZ8NZJv2cvhn/wmPjS/nFtbrLNClvp8eCXuZRLJH5mMBVQH7zZPAIPxKfib/wWoJ4+Eukj/t10r/5Ir9PaKAPyd+I11/wWO+K3gnVfhzr3w1htdL1+2axvjY/2VbyywOMSR+b5/wAisMg4x8pIzzX3V+xX+zjb/swfALQ/h3OkDa/cbtU8QzwnIl1GYDeA38SxqqRKe4iB717xRQAUUUUAfOH7Z37F/gv9r7wVa6dqN9/YXirQ/MfRNbSESeVvxvgmTIMkL4HGQVIBHdW/KLxf/wAEq/20vDGryadpnw5sfEtsH2x6hpOt2nky89dtxJFIP+BIK/eyigD8kf2U/wDgkF4zk8UWHjH9qGXT9P0awkSf/hGLK7W5uL11ORHcTR5jji6ZEbOWGRlOtfrNb28FrBHbW0McUMKiOONFCqqgYAAHQAdqsUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUV8v/ABx/bj8P/A39p3wF+zlrngqe6Xxxb6fMNdXUlijsjd3k9qgaExncA8IJO8cP7c9p8UP2krX4afH74XfAqbwjLqEvxL+2+XqS3gjWx+zpuOYth8zP+8MUAe2UUVV1G7FhYXN8U3C2hebbnGdoJx+lAFqivgP4f/8ABTP4t/FbQj4p+G37CvjfxJpK3D2pvdO1jzofNQAum4WvUBhx719l/Cfxl4i+IPw90bxh4q8B6h4L1bUoXkutC1CTfcWLB2UK52rkkAN0HDCgDsaKhnaVIZGhjEkgUlULbQx7DPavEv2RP2oLD9rD4a6h8QrPwhP4Zl0vW7jQ7rTZ7wXLxyxRRSE7gidRMvGOxoA9zorwj4Z/tRWnxL/aT+I/7Pml+DJoIfhzbwSXOvG+DJczSCL90Idg24LyjO8/6rpzx7vQAUV518f/AIxaX8APg94m+MGs6bLqFr4btkne0ilEbTs8qRJGHIIGXkUZxXnn7Hn7YGjftcaJ4n1Kw8F33ha88LahFY3VjeXSzyESRlkkyFXGSsgxj+GgD6IoorM8R6sNA8PanrrQmYabZzXZjDbS/loW257ZxQBp0V8EeAv+CmnxJ+Jnh5PFXgb9hr4j+INKklkgW90m6N1bs6feUSLb4yO4r6K/ZU/ah8KftW/D+88b+HPD+qaFc6Tqcuj6npeo7TNa3KIr8EfeUrIOcA5DAjigD22iiuG+NfxQ074KfCbxV8V9WspL218MadLqD2scgja4KfdiDEEKWYhc470AdzRXzZ+x1+2hof7Xlt4pOn+Bb/wtd+FjYtNbXd4k7TQ3ccjxSgqq4BER/MV9J0AFFFFABRRXyn+0H+3fafBn4w2nwJ8E/BXxf8S/GEunLqlzZaCuTBE+4gYCu7EKN5+UKAyc9QAD6sor5r/Zo/bOsfj9498SfCjxJ8I/FXw48a+GbKPU7jR9djxI9o5QeYMqjg5kiOCgyJFIJ5x9KUAFFFFABRRXhn7W37UGlfspeANJ8cah4RvPE8+ta5DodpptncrDK8skUsm4Eq2QPJxjHVhQB7nRXkv7MP7QGjftO/B3Sfi9omizaNFqU11by6fNOJpLeSGZo8M4AByFV+nRxXrVABRXm/7Q3xgh+APwa8T/ABgudCk1qLw1bx3DWEdwIGn3zJFgSFW2/wCsz0PSqf7M/wAeNG/aV+DOgfF/RdKk0qLWvtEcunyXAme1lhmeJo2cAZ/1e4HA4YUAeqUV8zQfts+H739s9v2PdO8GT3F3BbvLc66NQXyo5VsftZi8nZk4XCk7+CTxxX0zQAUVznxB8WReAvAXiTxzcWb3cfhzSLzVnt0fa0y28LylAecE7MZ968x+Fn7Tmm/FH9lh/wBqK08JXNjZrpGsat/Y8l0ry7dPluIynmhcfObYkHHG7vigD3GivKf2YvjraftJ/BXQfjLZeHJdCg11rxUsJbgTtF5F1LAcuFUHJiJ6d69WoAKK+W/2ov217/8AZ3+KfhH4T6F8E9a+IGseL7CS9s4NJvtk+UdgUSHynMhwhbgjjNYXw0/4KBXHiX4y+Gvgp8V/2c/HXwx1bxgsg0afWgDHPIiscEMkZAOwrlQ3zFQQAdwAPsGiiigAor428Vf8FH/CXhb9qb/hmmT4bancKviTTfDMviFL9Bbx3N4qbcxbMja7MuN3Plsa+yaACiivB/iX+1HZ/Dj9pX4cfs5yeDZr+f4iW01zHqwvhGll5Yl4MWwmTPlf3h1oA+Bv+CqHgvVfGf7XNk+gTTQ6p4b+EI8S2kkXVTYahfzyH8Io5SPcCvY/iN8QLT4rftYfsS/Euy2iPxNomoaoVXpG8tmrtH9VYlT7iui+LOj6d4h/4KteCPD+r24nsdU+Dt5ZXUR6SQyTamjr+IJFfKP7O2sahpn7Tn7O/wADdfuGfWPg/wCMPGfhWcP994BmWKT/AHSZJVHtH6YoA/Zqs3xH/wAi9qn/AF5T/wDos1pVm+I/+Re1T/ryn/8ARZoA+Gv+CQniLw9pP7Jk1pqevadZzf8ACVai3lz3UcbbfKt+cE196I6SKHRgysMgg5BFflD/AME4f2HP2bv2hf2eZfH3xV8FXWra0niG8sVni1e7tl8iOOEouyKRR1ZucZ5r9VNK0600fTbXSbCMx2tlAltChJO2NFCqMnk8AUAXa+Ef+Cc0f/CE/Gj9qL4OEeVDoXjv+1LKI8Zt7mS4CkD/AK5ww/mK+7q/PS98UL8B/wDgoh8ftdkcW1n4h+Er+MIQeA01hBCC3/kC5P1zQBsf8Ey1/wCEy8fftKfG8kSR+K/iBNZ20nXEUDzzBQfTZdxfkK+86+Of+CT3hFvDX7Gfh7VZEKzeKNV1LWZM9T/pBt1J+qWyH6Yr7GoA+Kv+CteuXdp+ying+wO668a+KtK0SKIHmQ73uQPputl/Suc/ZQ0i0+Df/BQr48/BWwXytO1rw9o/iGxGMCQQRQqxA9d97KP+AmsX/gqp8R/DHhT4j/s46V4xu5k8P2Pi1/E+tiGMySC0tZrUfKg6kpJOB9K4Xwz+1X8Ivi9/wVB+GfxF+Eup38mleIPDM3hXV/tlm9s5udl28WAfvAt9lH/AaAP1MrnPiN/yT3xR/wBga9/9EPXR1znxG/5J74o/7A17/wCiHoA+TP8AgkP/AMmb6d/2MOqf+jFrnv8Agkh/yJvxm/7KNef+io66H/gkP/yZvp3/AGMOqf8Aoxa57/gkh/yJvxm/7KNef+io6APvevjz/gq74pbw7+xj4k0yFis/ibVNM0eLb1J+0rOQPqlsw+hNfYdfnp/wVy8deH9BtfgZ4W8V3MkWh3njca7qflxmRhaWQiSVgo6kJeNgd6AF/Zf8Nr8CP+CiXjn4PoBb6f4i+Guh3trEOjz2VtaQHHryLs/nX6FV+Vd5+1x8GvjF/wAFI/gd8T/hPquozW8+ny+ENWW8smtizT/aVg6/e/eXQ/74FfqpQAUUUUAFfn34ourb4Z/8FdNF8R+NJBpulePPB39m6LfT/LBPdiMJ5PmHjfuh2465liH8Qz+glfmz+1Z4c+IH7f8A+0T4i/ZT8Iy+H/DHh34PQR6td67f2puLy71Ce2HlxRleY4iZAjAH/lkZDvIjjoA7T9nbxJo3xS/4Ka/G34ieBL6PV/Dek+D7Hw9Lqtqd9vJeb7TKq44b5racAjg+USMjmvvKvzf/AGNv2nfhd+yz8CfG/wAK/i58P28GeN/hDcLJ4l07TLZGutbjluYoI79PMkHnPmaEOd+3YY3j+Rgi/odoGs2niPQtO8Q6esgttTtIryASLhhHIgZcjnBwRQBpUUUUAFfDf7eTDxj+05+yn8JkIljuPGMviK+g6gxWb27rkehUXA/A19yV+ZX7VH7Qfw3+FX/BTzwR4y+Jt/eQaD8PfBjxEWtsbh/tt3Hd4+Qf9M7mM/8AARQB6d/wSylbwnoPxp+BszYk+H3xH1C3jQ/8s4JP3SAe2+0lP4mvuevzV/YJ+N3gL4g/t6/Hmf4a3txL4Z8f6XbeI7Rrm3MEkk9u0ImBQ9D5l5P9QM1+lVAHzb/wUZ/5Mp+Kn/YMt/8A0rgrwL/glN4hb4c+GviX8D/FF+IY/DbaX41tJJzjGn6pp0U5P+6ipEx95fevff8Agoz/AMmU/FT/ALBlv/6VwV8C/tTeJPEH7OumfDr4n+GLaTyPjH+z/b+Br1ozjFylrbAzf7wilgA78HFAFf8AYtuNY8Y/8FAvBnx01kyKfipP4w8QWkb9I7QC7hRR9GikT6IK/ZSvzf8AAnw1Hwf/AG0v2Tvhq9usNxoXwovYL1QMf6YYLx7g/jM0h/Gv0goA86/aN/5N6+KH/Yma3/6QzV8q/sj/APKJB/8AsTPGn/pVqdfVX7Rv/JvXxQ/7EzW//SGavlX9kf8A5RIP/wBiZ40/9KtToA7z/glf/wAmN/D7/rtrH/p0uq+s6+TP+CV//Jjfw+/67ax/6dLqvrOgD4I/af8A+UnX7M//AGDL7+V1R+2J/wApDP2Vf+u15/6GK5P9vPwXqvxF/b3+AXgrQfHGreDr/VNGvIodc0pyt5ZENO26IqQQSFK9RwxrmP2T/hFqt3/wUG8X+E/2h/iv4x8Y+L/g9Cb/AMHSaxqLzx3tjLwJ280sUIS6tpBGhxvZs52cgH6lUUVy3xQ8Vr4E+Gni3xw7BV8PaFf6qWPQfZ4Hl/8AZKAPxr8eWF54p+DXxy/au0dN13p/x/tNRtLgdre3Nx5SZ9AdRg/IV+1+iarZ6/o1hrunPvtNStYruBvWORQyn8iK/Ej4d/tK/s+aJ/wTm8Yfs2+ItV1VfG/iS5utU8pdOkeA3i3MMtvmbpyLWHJ7Zr9Uf2HvGY8e/skfCrxCZfNceG7bTZXzktJZ5tJCfffAc0Ae6V8EftP/APKTv9mj/sF338rqvvevgj9p/wD5Sd/s0f8AYLvv5XVAHf8AjL4Z+P77/gpn4G+K1n4U1CXwhp3w2l0q61lYs20N4bi/IhLf3sSxnH+0K8Z8Y/stfEfQ/wDgqv4b+NXhjwLqV14J1WWLWNQ1W2hza2dwbGa3lWRuzGSMSH/rsPWv0eooAKz9chluNE1C3gQvJLayoqjqSUIArQooA/LL9jT4m/tTfsk/CGT4U337DHxF8Sytq9zqn22CVrdMSpENm3yH6eX1z3r9FPg1458UfEn4a6P428Y/DnU/Aesaj9o+0+HtSk33Nl5dxJEu87VzvRFkHyjhx9a7migAr84f+CmnwU+OXiX4r+FviJ8Evh3rPih9T8Fax4O1n+zYfMMNvKJAok9M/a5CPXYa/R6igDy39l7wFefDD9nX4ceAdSs3tNQ0fwzYQ38DDBivDCrTqfcStJXqVFFAHxn8R/hl8RfG3/BTL4ZePX8G6sfAngXwlc7tXa3P2M6hKl4Ngk6bv30HHqlH/BQH4YfEXxH44+AHxX+Gfg7VPEN/8PvG0dzew6bAZZUspJIJZHYDnZ/ou0/7/vX2ZRQAVgeOrO51DwT4h0+ygaa4utKu4YY0GS7tCwAHuSa36KAPy9/Y++Kv7VH7KvwXt/hLefsKfELxHLbahdX322Kc2yt5rA7dvkP0x1zXvX/BMv4O/FD4U/CnxhqXxX8KTeGdW8ZeLbnW4NLuHBmht2jiUFwD8hLiQAHBwoOOa+yKKACvjP46fDH4ifEP/gof8DPEEXg3VJ/AfgnR7zUbzWhbk2kF863JWIv037obT/vsV9mUUAfGf/BSP4YfETxbpfwi+Ivwq8Hap4l8QfD/AMdW2pfZNMtzNOltjzXkwOwktYR9WFfZYORS0UAFFFFABX566qn7Qf7MH7aHxd+LHh/9mvxP8S/C/wAR7XT2sbrQZ1zCYoowwcBXIIYSDBA6AjINfoVRQB+P37a/h74xftfz6T4i8O/sL/E3wl4z05TbT6rMoaG+sQCfJmHlJllflDnuwwcjH6FfsZ/Hbwd8e/gV4e1rwzI9vf6DaQaJrmlTN/pGnXsESo0bjjg7dytjkHsQyj3eqttY2Vm8klraQQtMd0hjjClz6nHXqfzoAtUUUUAFfGf7P3ww+Ij/APBQH49/HHxl4N1TStHvNPs9B0C+u4DHDfQL5CM0JP3x/oUZyP7w9a+zKKAPjL4l/DD4i6T/AMFLPhj8avC3g7VL3wpqfhW40LxHqNtAXgtZAt35ZlYfdyWtev8Adr7NoooA8G/bn8HeKPiD+yf8RfB3grQrrWdb1PT4YrOxtU3TTuLqFiFHfgE/hW/8N/hR4X1v4IfDLw98U/h5ouq3/hzw1pUX2XW9LhumsLqO0iSQKJVPluGXBI/u161RQB8m/Ev4aeO9W/4KKfCH4m6b4W1C48KaJ4Q1Sy1DV44s29tPIl2EjduxPmJj6ivrKiigDkviz4Yv/G/wr8ZeC9LeNL3xB4f1HS7ZpDhRLPbSRISfTLivzc+Ffjz9rT4Qfsn3v7JVz+w5451S+j0rW9Fj1uC7/wBH/wBPluH8zakLI4Q3J+7Jhgg5GeP1QooA+fP2C/hR4y+C37KPgX4efEHThp3iCxjvbi8s/MVzbm4vZ50jJUkbhHKucHg5HavoOiigD4z/AGgvhV8RvEn/AAUC+AfxI0Hwfqd94X8OafeRarqsMWbezdxc4Ejds71/MVn/ALUvwp+I/hP9sv4M/tRfCXwVq+vxIzeHPGUGlwGVk08nb57qv3v3VxN17wRe1fblFABXhv7bWneNNa/ZV+JGgfD3w7qGu6/rGk/2Xa6fYRGWeZbiVIZdqjriKSRj7A17lRQB4d+zr8IpfDv7H/g34OeJtOewuZvBken6taSrh4J7q3JuY3H94PLID7g15x/wTF8IfE74dfszD4ffFbwdqvhvU/D/AIg1CC0ttQgMRltZPLnEseeqGSWYZ9VNfXFFABXxn+0F8KviN4k/4KBfAP4kaD4P1O+8L+HNPvItV1WGLNvZu4ucCRu2d6/mK+zKKACiiigAooooAKKKKACiiigAoorwv4r/ABB+Nd18Vrb4P/Az/hELLUbTww/irUb7xNa3NzDMhuTBbWkSQSRlC7xyl5SW2qBhSTQB7pRXlfxG+Knij4afAC++KWu+D4IPE1npVvJLoZvhLBFqc7RxLAZ0HzRCeUAyAZKDOM8Vm/DD4gfFOL4q638Gvi+/he/1Wz0Cy8Tafqvh2yuLO3ltp55oJIJYJ5pnWSOSHhxJh0ccKQQQD2aivmrUv2nvEGh/G74pfCnW9Fsraz0HSRdeENS2NtvL+LSo725s5/n5k2SCWPG3dHFN3jzXb618W/E+ifstSfHG18PR6xr8PgmPxINNt1cRzXLWYmKADLhNxPAy20dzQB69RXiX7NvxD8UfEbTL/WdT+Nvwx+I2mtFbSW9x4OsZLZ7GdwxkhuFa6nwAAmzcI5Pv7lGKyvEPx/8AGOk/Cr4v+ObbTdHa/wDAHii50bTI3hlMM0Ef2XDTAS5Lfv3yVKjgcdcgH0FRXnXxi8faz8P7fwfNosFpK2v+MNJ0C6+0xs222uZSshXaww4HQnI9jXX+IofEVxoN9b+FNQsLDWXt3WxuL+1e5t4psfK0kSSRtIgPVQ6k+ooA1qK8I/Zv8W/HjxxeeJ9S+KPifwTeaVomuar4bhttD8P3VlO9zZ3Xk+eZZbyYeWwR/wB3syCw+bjnlfFv7RHxb0m88Z/ETRtM8Jt8O/AHjC28Kalp1zbXJ1i/UyWsV1dw3AlEMXlyXXyRGJ96xNl0LDAB9Q0V4v8AtRfFHxN8LPCPhu/8MeKfDPhmbXfFNlolxrPiS2M1jYW8sczNLIvnQ9DEoyZAOai/Zf8Ai94l+LOkeL4vEmt+GfEn/CKeI5NDtfEvhiJ49L1mIW0E3mxK0suGRpmifbIybozg9gAe20V8s/DP46/Eb4g/FfV/DMvxv+DmmxaZ401jRI/Bz6fI/iGexsbyaLKn+0B+8eGEyb/s5A5O0gV1n7UHxp8R/Cm68D6LpPivwt4KsvFuo3NpfeMPFFnJc6dpPlQeZHEyLNCnmzNwhklVAI5OpxQB71RXK/DXUdf1bwNpOp+J/EPhzXtRuIS8mp+HlZNOu03ny5YQ8khClNhPzsM5wSMVzPxz+Jur/B/TvD/jyZLE+DrfWYbPxfPNG5lsLC4BiivI2DYVYrl4DLlW/dNI3G3NAHqFFee/A7xn4v8AiJ8ONP8AH3i7S7bTH8RST6npdjFE6SW+lSSMbFZ97HNwYPKeTG0BmI2jHNn41/EIfCn4TeK/iIlqLq50TS5p7O1IJ+1XhG23gwO8kzRp/wACoA7mivPvgZ481v4ifDbTda8WWdrZeJ7OW50jxDaWmfJg1Wzme3uhHkk+WZYmaPJOY2Q5Oc189eD/ANqH4ma18XF8Np8RfhhraT/EfWPB83gWytJE8R2GmWt9dQDUHcXbcJFbpM5e3RCjHBBK5APsaivJvjV8QvHfh/xF4G+HHwzXRLfxF46v7yGPUdatpbmz0+1tbV55pTBFLE8shxGiL5iDLkk4GDa+BXxK8QfELwfq9x41sNPtPEHhbXtT8Oax/Zxk+xzXFnKVM8AkJdY5E2OFckrkjJxkgHp9FfMfwC+O3xn+I+o+DfFfi1vh3F4V+JNjcappeiWt09vrmj2uHe0kkEspF8JEjIk8qOPY5yMqDjrv2ovjZ4p+C/hnQ7nwLoNtruvatqbt/Z8wYltNs7aa91GRApH7z7NbPHHzjzZouDnFAHt1FcN8SfHTeHvgz4o+JnhKS0vX0zwzfa9pkjgvBMY7RpoSQCCUOF6EcHqK8u+GHxF+NuifEjwZ4G+LfiPwx4psPiH4Zvdd0rUNI0OXS7iwubX7I0ttNG1xMksbR3YKyAocxsCORgA+iqK+evir8XfjLH458b+GfhFa+EIrb4a+F7PxHq58QW1zO+qS3P2to7OAwzRi3Ajs2JmYS/NKo8vAOem+IPxs1PRf2ZLz4++D/Dn265k8MW/iGxsJxI6xieJJA0wiG9o4lk8yTZyVjfGKAPX6K8d/Z18ceJvHujalrGqfGf4b/EnTcwGx1DwdZtbeRIQxlhuENzOAR+728q33twHFexUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAV4r8VPhZ8Vrn4j2vxa+Cfijw3puvy6A/hfUbfxHZz3Fq1r5/nw3MXkupE0Ujy/I2UkEmCUxmiigDd+IXwj1H4j/Au9+EXiPxveXOq3ulQWkniJrSJZXv4tjpeNBGFj/10ayGNdoxlRjrWT8Kfhf8AEnT/AIia18XPjH4p8O6n4jv9Fs/DlnbeHrCa2srWyt5ppmdvOkd3lllmJPQKEUDPJoooAwviT+y6PiRZfFm3vvEaWN146vNO1TQb63iPn6Lf2dhFbxTZ/iy8bbwMbopHjPDGvQtL8GeNPC3wZ0fwH4O8RaVZ+JND0Ox0y11K+sXurMzW8SIS8KyRuUcIRw4I3Z5xglFAHEfB/wCBvjLw38W/Efxs+Iup+EU17XdFtdC/s/wlpUtlZGKKZ5jcTtLIzz3BaTaGONqKBznjH8Y/s5fEPW9S8YeEdG8b6Da/Dr4g6/b+IdcguNOlk1a3cfZ/tNtayiUReXN9lX55EzH5smA3y4KKAO++Pfw68YfEbwzolv4D1bSNP1vw/wCJNO8QWsmrwyy2sj2shby5FiIfB9iK6D4dx/FWLR51+LV74UudW+1Mbd/Dltcw24t9i4DrcSO2/d5nIOMbeOtFFAFH4S/D27+HOn+JLO+1GG8bXPFeseIo2iQr5Ud5dNMsZz1KhsE15J4r/Zl+I2sa14q8KaT4/wBDt/hn478U2vi3WrWfS5ZNXgmjkt5J7W2mEoi8qZ7SM73QtGJJAA3BoooA9V+L3wvb4oL4Ot5JrL7L4c8U2fiC6gu4fNS6ihimUxAdMkyqeeOKg+Cvwuv/AIRW3ibwpbajaz+FrjXrrV/DlnFGUfTLe7ImmtCPu+Wty07R46JIF/hoooA89+HnwU+M/wAPPiBquo2Evwqu/Duq+L9V8QSXNxo12dbjtr69lnkiSdZBH5irKUB249c16R8WNF+L2sQWUfww1fwQtsRLFquneKtHnvILtG2bGV4ZkKFdrfKVcNv7YFFFAEH7P3wlb4I/C+w8Ay6rbX88V5fajcSWdp9ktEmu7qW4kit7fc3lQI8zKiZOFArT+NvgK6+K3wd8bfDPT72C0ufFXh+/0eG5nQtFDJcQPGsjAckAsDx6UUUAdhZ2wtbSC1GMQxLH8owOBivNvj18ILv42+H9C8FyeIbnSdDi1+z1XW3s53gup7e13zQxQSJzG/2pbWTfngRHHOKKKAIPgp8FLr4L6x4ytrDxXqeseHvEd/b6zarq19Ne38N6YBDdmWeUkyI4hgYc8HzPauB8P/sv+MbXXsazrvgwaJB8RdQ8eQz2mhSnWSZdUmvorf7W0wWMZlEchEZzHvQfe3AooA9A+NHwx8X+MtW8HeO/hr4i0rS/Fvga/ubqxXWLWS4sLuC5t3guIJhEyyLlXV1dTw0Y4IJq78Evhhqfw18HX+m+J9bt9a17xHrOoeIdbu7W2NvbPeXkpkkjgiZmZIkXbGuWLEJknJoooA8s+E37KnifwR4h8Aw+Kte8KapoHwkW5i8KXlporRa3cQPbz28EN5cs5Xy4orub5YwBJJ5chC7cHsPip+zqPjB8U9K8Y+JvGuv6Zo3h7QbjTtNtdA1W4066F3dTA3csk0RGYzFDBGEz/fz2oooAsaB8E9e0f9mPUv2frnxJBdzDw/qnhjS9RdWIjspEmhsfNHUtFbtCr46mMkdaz/hp8GPiZaeN/Dfjn4veM/Dmoy+CvD9xoGgWHh/S5rWFBcfZ/PuZ5J5pHlkK2kSBQFVRuPJPBRQBU+LHwM+KmteNvFXin4R+O/DuiQ/ELw7beGvEket6VNeNbJb/AGgRXlmY5UHmiO7lUxyfISsZzwQfRpPBniTwr8KrDwH8KNcsNM1PQNMstO0i81ize8txHbCNAs0UckTEPGhUlWBG7cM4xRRQBxfwV+Cfi3wb8RPFvxb8fah4TXX/ABXY6fpklh4U0qSxsEitXnkE0vmOzzXDNcsC5xhEUc17bRRQAUUUUAFFFFABRRRQAUUUUAf/2Q==" alt="Nevada &amp; Amurai · Consultores y Abogados">
+    <span class="topbar__code">NA-PROEDUCO-PLAN-2026-08-25-B</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div class="hero__rule"></div>
+    <h1>Mapa de embudos de la campaña</h1>
+    <p class="hero__sub">Nueve embudos en dos fases, más una capa transversal. Pincha cualquiera del mapa y baja a su diseño: cada fase con objetivo, público, acción, canal, mensaje, llamada a la acción, datos que se capturan, criterio de avance, métrica, responsable, cadencia y piezas.</p>
+  </section>
+
+  <section class="navdoc">
+    <div class="navdoc__h">Cómo se lee este documento</div>
+    <div class="navdoc__b">
+      <p><strong>Este documento no se lee entero de una vez.</strong> Es de consulta: se abre cuando hay que entender por qué una acción existe y qué se espera de ella.</p>
+      <p><strong>Empieza por el mapa.</strong> Verás los nueve embudos. <strong>Pincha cualquiera</strong> y la página baja sola hasta su detalle, fase por fase.</p>
+      <p>Cada fase se lee de izquierda a derecha como una frase: <em>a quién le hablamos, qué queremos que haga, por dónde se lo decimos, con qué pieza, quién lo hace y cómo sabemos si ha funcionado</em>. Si una fase te parece que sobra, mira su columna de criterio de avance: ahí está por qué está.</p>
+      <p class="ojo"><strong>Qué no busques aquí:</strong> los textos de las piezas ni cómo producirlas. Eso está en el plan de producción. Aquí solo está el recorrido y el porqué.</p>
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <section id="criterio">
+    <div class="sec-head">
+      <span class="label">El criterio</span>
+      <h2>Cómo está ordenado el sistema</h2>
+      <p class="lede">Cuatro reglas que explican por qué los embudos están donde están y por qué se trabajan en ese orden.</p>
+    </div>
+    <div class="cambios">
+      <div class="cb"><span class="cb__k">De dentro hacia fuera</span><span class="cb__v">Se empieza por quien ya os conoce y se avanza hacia quien no. <b>Cuanto más lejos está la familia de vosotros, más largo es el embudo</b> y más tarda en dar resultado.</span></div>
+      <div class="cb"><span class="cb__k">Canal propio y canal prestado</span><span class="cb__v">En el bloque A habláis vosotros directamente con la familia. En el bloque B <b>hace falta que la dirección del colegio abra la puerta</b>: cambia el ritmo, quién ejecuta y dónde está el riesgo.</span></div>
+      <div class="cb"><span class="cb__k">Un solo formulario</span><span class="cb__v">Todos los embudos desembocan en el mismo formulario de inscripción, con un enlace y un código QR distintos por cada origen. <b>Así se sabe de dónde viene cada alta sin multiplicar formularios.</b></span></div>
+      <div class="cb"><span class="cb__k">Dónde tiene sentido el sorteo</span><span class="cb__v">Solo en las jornadas, porque es donde hay familias presentes de las que <b>todavía no tenéis ningún dato</b>. En el resto de embudos la familia llega ya interesada y no hace falta incentivo.</span></div>
+    </div>
+  </section>
+
+  <!-- MAPA -->
+  <section id="mapa">
+    <div class="sec-head">
+      <span class="label">Nivel 1 · La arquitectura</span>
+      <h2>El mapa completo</h2>
+      <p class="lede">El número indica el orden de trabajo. Se empieza por quien ya está dentro y se avanza hacia fuera: cuanto más lejos del cliente actual, más largo el embudo.</p>
+    </div>
+
+    <div class="fase">
+      <div class="fase__cab"><span class="chip">Fase 1</span><h3>Campaña de curso</h3><span class="t">1 – 30 de septiembre · la ventana está abierta</span></div>
+      <div class="bloques">
+        <div class="bloque"><div class="bloque__t"><h4>Bloque A · Canal propio</h4><span>Familias · contacto directo</span></div><div class="fila" id="fila-a"></div></div>
+        <div class="bloque"><div class="bloque__t"><h4>Bloque B · Canal prestado</h4><span>Colegios · abre dirección</span></div><div class="fila" id="fila-b"></div></div>
+      </div>
+    </div>
+
+    <div class="fase">
+      <div class="fase__cab"><span class="chip chip--n">Fase 2</span><h3>Talleres en espacios de terceros</h3><span class="t">En espera hasta que el taller esté definido como servicio</span></div>
+      <div class="bloques">
+        <div class="bloque"><div class="bloque__t"><h4>Servicio nuevo</h4><span>Ficha parcial</span></div><div class="fila" id="fila-c"></div></div>
+        <div class="bloque"><div class="bloque__t"><h4>Servicio nuevo</h4><span>Ficha parcial</span></div><div class="fila" id="fila-d"></div></div>
+      </div>
+    </div>
+
+    <div class="transversal">
+      <div class="bloque__t"><h4>Capa transversal</h4><span>No captan. Sostienen todo lo demás</span></div>
+      <div class="tr-grid">
+        <div class="tr"><h5>Redes sociales</h5><p>Apoyo de autoridad, no captación. Calendario trimestral con publicación semanal. Sin inversión de pago.</p></div>
+        <div class="tr"><h5>Banco de imagen propia</h5><p>Foto y vídeo reales de cada actividad. Ni imagen de archivo ni generada.</p></div>
+        <div class="tr"><h5>Reseñas</h5><p>Se piden en el momento de máxima satisfacción, no al final del curso.</p></div>
+        <div class="tr"><h5>Dato y trazabilidad</h5><p>Un formulario, código de origen en cada registro y volcado a Holded.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FICHAS -->
+  <section id="fichas">
+    <div class="sec-head">
+      <span class="label">Nivel 2 · Diseño operativo</span>
+      <h2>Fase a fase</h2>
+      <p class="lede">Doce campos por fase. Los mensajes que aparecen en cursiva son el ángulo, no el texto final: el texto lo produce el agente de marketing a partir de ellos.</p>
+    </div>
+    <div id="render"></div>
+  </section>
+
+  <!-- PARA ARRANCAR -->
+  <section id="arranque">
+    <div class="sec-head">
+      <span class="label">Para arrancar</span>
+      <h2>Lo que hace falta de vuestra parte</h2>
+      <p class="lede">Cuatro cosas que no dependen de producir nada y sin las cuales buena parte del sistema no puede ponerse en marcha.</p>
+    </div>
+    <div class="grid3">
+      <div class="card card--a"><h3>Los precios del curso 2026-27</h3><p>Sin ellos no hay ventana de precio ni circular de apertura. <strong>Afecta a los embudos 1, 2, 3 y 4</strong>, que son los que arrancan el 1 de septiembre.</p></div>
+      <div class="card card--a"><h3>La oferta cerrada con cada colegio</h3><p>Qué actividades salen este curso en cada centro y a qué precio. <strong>Afecta a los embudos 5, 6 y 7</strong>: hasta tenerlo no se puede producir ni un cartel.</p></div>
+      <div class="card card--a"><h3>Los textos de protección de datos</h3><p>El consentimiento para tratar datos con fines comerciales y la autorización de imagen de menores. <strong>Sin ellos no se publica ningún formulario ni ningún código QR.</strong></p></div>
+      <div class="card card--a"><h3>Qué es el reconocimiento por referido</h3><p>Se comunica en la primera circular, así que hay que decidirlo antes del arranque. <strong>Afecta al embudo 3.</strong></p></div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="footer__in">
+    <div class="footer__l">
+      <img class="footer__ico" src="data:image/png;base64,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" alt="">
+      <span class="footer__t">Nevada &amp; Amurai · Consultores y Abogados</span>
+    </div>
+    <span class="footer__t">NA-PROEDUCO-PLAN-2026-08-25-B · Documento de trabajo · Confidencial</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+var E=[
+{id:"e1",n:1,col:"a",nombre:"Renovación de cartera",sub:"Familias activas del curso anterior",
+ intro:"El embudo más corto de todos. No hay que generar confianza ni explicar nada: son familias que ya saben qué hacéis, dónde y con qué resultados. El objetivo no es vender, es asegurar y acelerar.",
+ meta:["Ana gobierna · Ángela produce","1 – 15 de septiembre","WhatsApp con apoyo de correo"],
+ pie:{"Métrica del embudo":"Renovadas sobre activas","Ratio a vigilar":"Matrículas dentro de la ventana sobre el total","Cadencia":"Diaria durante la ventana","Bloqueo":"Los precios del curso 2026-27"},
+ f:[
+ {t:"Preparación",obj:"Tener la lista limpia y el precio cerrado antes de escribir a nadie",pub:"Interno",acc:"Que el equipo pueda escribir sin dudar a quién ni con qué precio",can:"—",men:"—",cta:"—",dat:"Familias activas separadas de inactivas · teléfono verificado · servicio contratado",av:"Lista cerrada y precios aprobados",met:"Familias contactables sobre familias en base",resp:"Pedro y Lucía",cad:"Una vez, antes del 1 de septiembre",pz:[],hz:["Excel en Drive","Holded"]},
+ {t:"Apertura",obj:"Abrir el plazo y que se conozca la ventana de precio",pub:"Familias con alumno activo el curso pasado",acc:"Que abran el mensaje y entiendan que hay fecha",can:"WhatsApp · correo de apoyo",men:"Abrimos matrícula. Hasta el 15 mantenéis el precio del curso pasado.",cta:"Reserva la plaza de tu hijo antes del 15",dat:"Entrega y lectura del mensaje",av:"Ha abierto el mensaje",met:"Entregados sobre enviados · abiertos sobre entregados",resp:"Ángela",cad:"Envío único el 1 de septiembre",pz:["P-01 Circular de apertura"],hz:["Agente de marketing","Canva","WhatsApp Business"]},
+ {t:"Refuerzo",obj:"Mover a la familia que lo está pensando",pub:"Quien no ha renovado a los cinco días",acc:"Que recuerde el motivo, no solo la fecha",can:"WhatsApp",men:"El curso empieza. El grupo de tu hijo se está cerrando.",cta:"Confirma la plaza aquí",dat:"Respuesta o clic en el enlace",av:"Responde o entra en el formulario",met:"Respuestas sobre impactados",resp:"Ángela",cad:"Día 6 de septiembre",pz:["P-02 Recordatorio de ventana"],hz:["WhatsApp Business"]},
+ {t:"Cierre",obj:"Último aviso antes de la subida de precio",pub:"Quien sigue sin renovar el día 14",acc:"Que decida hoy",can:"WhatsApp",men:"Mañana cambia el precio. Hoy todavía no.",cta:"Renueva hoy y mantén el precio",dat:"Respuesta o matrícula",av:"Entra en el formulario",met:"Matrículas en las últimas 48 horas",resp:"Ángela",cad:"Día 14 de septiembre",pz:["P-03 Aviso de último día"],hz:["WhatsApp Business"]},
+ {t:"Matrícula",obj:"Cerrar el alta sin fricción",pub:"Familia que ha decidido renovar",acc:"Que complete el formulario de una vez",can:"Formulario web",men:"—",cta:"Completa la inscripción",dat:"Datos del alumno · centro · actividad · hermanos y edades · domiciliación · origen",av:"Formulario enviado",met:"Altas cerradas sobre formularios iniciados",resp:"Ana y Lucía",cad:"Revisión diaria de la hoja de respuestas",pz:["P-04 Formulario de inscripción"],hz:["Google Forms","Holded"]},
+ {t:"Rescate",obj:"Recuperar a quien no ha renovado y saber por qué",pub:"No renovados a 15 días del cierre",acc:"Que hable con vosotros",can:"Llamada",men:"Hemos echado de menos a tu hijo este curso.",cta:"¿Quieres que le guardemos la plaza?",dat:"Motivo de la baja, categorizado",av:"Vuelve a matricular o queda registrado el motivo",met:"Recuperadas sobre no renovadas · motivos por categoría",resp:"Ana",cad:"Una tanda el 30 de septiembre",pz:["P-05 Guion de llamada de rescate"],hz:["Teléfono","Holded"]}]},
+
+{id:"e2",n:2,col:"a",nombre:"Segundo hermano",sub:"Otro hijo de la misma familia",
+ intro:"El negocio más inmediato del sistema y el que hoy no se puede ni dimensionar, porque el dato no se recoge. Ahora entra por el propio formulario de matrícula, sin encuesta y sin fricción añadida.",
+ meta:["Ana gobierna · Ángela produce","Se alimenta de la matrícula","Ciclo de venta muy corto"],
+ pie:{"Métrica del embudo":"Matrículas de segundo hermano sobre hermanos detectados","Ratio a vigilar":"Cobertura del dato: fichas con hermanos declarados","Cadencia":"Semanal durante septiembre","Nota":"El descuento de segundo hermano ya está en vigor"},
+ f:[
+ {t:"Captura del dato",obj:"Saber qué familias tienen otro hijo y de qué edad",pub:"Toda familia que se matricula",acc:"Que rellene un campo más sin percibirlo como una encuesta",can:"Formulario web",men:"—",cta:"—",dat:"Existencia de hermanos, nombre y edad de cada uno",av:"El campo viene relleno",met:"Fichas con dato de hermanos sobre matrículas",resp:"Leo monta el campo · Ana explota el dato",cad:"Revisión semanal de la hoja",pz:["P-04 Formulario de inscripción"],hz:["Google Forms","Excel en Drive"]},
+ {t:"Filtro",obj:"Quedarse solo con los hermanos en edad de programa",pub:"Interno",acc:"Separar los que hoy encajan de los que no",can:"—",men:"—",cta:"—",dat:"Servicio que le corresponde a cada hermano por edad",av:"Hermano asignado a un servicio",met:"Hermanos en edad sobre hermanos declarados",resp:"Ana",cad:"Semanal",pz:[],hz:["Excel en Drive"]},
+ {t:"Propuesta",obj:"Que el pequeño entre",pub:"Familia con alumno activo y hermano en edad",acc:"Que pida la clase de prueba",can:"WhatsApp del coordinador",men:"El mismo cuidado que ponemos con tu hijo mayor, para el pequeño desde el principio.",cta:"¿Le reservamos sitio en una clase de prueba?",dat:"Interés y disponibilidad horaria",av:"Acepta la prueba",met:"Respuestas sobre propuestas enviadas",resp:"Ana",cad:"Contacto en las 72 h siguientes a la matrícula del mayor",pz:["P-06 Mensaje de segundo hermano"],hz:["WhatsApp Business","Agente de marketing"]},
+ {t:"Prueba",obj:"Quitar el riesgo de la decisión",pub:"Familia que ha aceptado",acc:"Que el niño asista",can:"WhatsApp",men:"—",cta:"Te esperamos el martes a las cinco",dat:"Asistencia confirmada y real",av:"El niño asiste",met:"Asistentes sobre invitados",resp:"Ana",cad:"Recordatorio la víspera",pz:["P-07 Invitación a clase de prueba"],hz:["WhatsApp Business"]},
+ {t:"Matrícula",obj:"Alta del segundo alumno",pub:"Familia tras la prueba",acc:"Que complete la inscripción",can:"Formulario web",men:"—",cta:"Completa la inscripción del pequeño",dat:"Alta con descuento de hermano aplicado · origen etiquetado",av:"Formulario enviado",met:"Matrículas sobre asistentes a la prueba",resp:"Lucía",cad:"Diaria",pz:["P-04 Formulario de inscripción"],hz:["Google Forms","Holded"]}]},
+
+{id:"e3",n:3,col:"a",nombre:"Referidos",sub:"Familias que traen familias",
+ intro:"El canal que más convierte y el único que hoy funciona solo, sin que nadie lo pida, lo registre ni lo agradezca. Se abre a toda la base y no se limita a hermanos.",
+ meta:["Ana gobierna · Ángela produce","Toda la base de datos","Reconocimiento, no descuento"],
+ pie:{"Métrica del embudo":"Matrículas referidas sobre nombres obtenidos","Ratio a vigilar":"Nombres obtenidos sobre peticiones hechas","Cadencia":"Semanal","Decisión pendiente":"Qué es exactamente el reconocimiento"},
+ f:[
+ {t:"Mecánica",obj:"Que todas las familias sepan que existe",pub:"Toda la base, activa e inactiva",acc:"Que retenga que traer a alguien tiene reconocimiento",can:"WhatsApp · redes",men:"Si alguien viene de tu parte, lo agradecemos de verdad.",cta:"Dinos a quién le vendría bien",dat:"—",av:"Ha recibido la mecánica",met:"Familias alcanzadas sobre base total",resp:"Pedro decide · Ángela produce",cad:"Con la circular de apertura",pz:["P-08 Mecánica de referidos"],hz:["Agente de marketing","Canva","WhatsApp Business","Instagram"]},
+ {t:"Petición",obj:"Conseguir un nombre concreto",pub:"Familia satisfecha en un momento de logro",acc:"Que dé un nombre en el acto",can:"Presencial en la entrega del informe · WhatsApp",men:"—",cta:"¿A qué familia de la clase le vendría bien esto?",dat:"Nombre y teléfono de la familia referida · quién refiere",av:"Hay un nombre registrado",met:"Nombres obtenidos sobre peticiones hechas",resp:"Ana y monitores",cad:"En cada entrega de informe y examen de nivel",pz:["P-09 Guion de petición de referido"],hz:["Google Forms","Excel en Drive"]},
+ {t:"Contacto",obj:"Llegar sin que sea una llamada fría",pub:"Familia referida",acc:"Que responda al mensaje",can:"WhatsApp",men:"Nos ha hablado de vosotros la familia de [nombre].",cta:"¿Queréis venir a una clase de prueba?",dat:"Respuesta e interés",av:"Responde",met:"Contactos efectivos sobre nombres obtenidos",resp:"Ana",cad:"En 48 h desde la referencia",pz:["P-10 Mensaje a la familia referida"],hz:["WhatsApp Business"]},
+ {t:"Prueba",obj:"Que el niño nuevo entre con un amigo dentro",pub:"Familia referida",acc:"Que asista a la sesión abierta",can:"WhatsApp",men:"—",cta:"Ven con la familia que te ha invitado",dat:"Asistencia",av:"Asiste",met:"Asistentes sobre invitados",resp:"Ana",cad:"Una sesión abierta al mes por grupo",pz:["P-07 Invitación a clase de prueba"],hz:["WhatsApp Business"]},
+ {t:"Cierre",obj:"Matrícula y reconocimiento a quien refirió",pub:"Ambas familias",acc:"Que se matricule y que quien refirió lo note",can:"Formulario · WhatsApp",men:"Gracias por traernos a una familia como la vuestra.",cta:"Completa la inscripción",dat:"Alta con origen «referido» y quién refiere",av:"Alta cerrada",met:"Matrículas sobre contactos efectivos",resp:"Ana y Lucía",cad:"Entrega del reconocimiento en la semana siguiente",pz:["P-04 Formulario de inscripción","P-11 Comunicación del reconocimiento"],hz:["Holded","WhatsApp Business"]}]},
+
+{id:"e4",n:4,col:"a",nombre:"Recaptación de antiguos alumnos",sub:"Los que dejaron de venir",
+ intro:"Embudo propio, con mensajes propios y doble objetivo: recuperar al alumno que se fue y, en la misma conversación, provocar efecto llamada sobre hermanos u otros menores de la familia que hoy sí encajen en algún programa.",
+ meta:["Ana gobierna · Ángela produce","Base histórica completa","Doble objetivo"],
+ pie:{"Métrica del embudo":"Matrículas sobre familias contactadas","Ratio a vigilar":"Cuántas altas vienen del alumno original y cuántas de otro menor de la familia","Cadencia":"Semanal","Riesgo asumido":"Teléfonos desactualizados"},
+ f:[
+ {t:"Extracción",obj:"Aislar a las familias que fueron clientes y ya no lo son",pub:"Interno",acc:"Tener una lista limpia y con el último curso cursado",can:"—",men:"—",cta:"—",dat:"Último curso · último servicio · edad actual del alumno",av:"Lista cerrada",met:"Familias con teléfono válido sobre total histórico",resp:"Lucía",cad:"Una vez, antes del 1 de septiembre",pz:[],hz:["Excel en Drive","Holded"]},
+ {t:"Reapertura",obj:"Recuperar la conversación reconociendo el tiempo pasado",pub:"Familias inactivas",acc:"Que respondan aunque sea para decir que no",can:"WhatsApp",men:"Hace tiempo que no sabemos de vosotros y nos acordamos de [nombre del niño].",cta:"¿Qué tal le va? Cuéntanos",dat:"Respuesta · situación actual del alumno",av:"Responde",met:"Respuestas sobre contactadas",resp:"Ángela",cad:"Envío único el 2 de septiembre",pz:["P-12 Mensaje de recaptación"],hz:["Agente de marketing","WhatsApp Business"]},
+ {t:"Efecto llamada",obj:"Abrir la puerta a otro menor de la familia",pub:"Familia que ha respondido",acc:"Que nombre a otro niño de la casa",can:"WhatsApp",men:"Si hay alguien más en casa con la edad, ahora es buen momento.",cta:"¿Hay algún otro peque en casa?",dat:"Existencia y edad de otros menores de la familia",av:"Nombra a otro menor en edad",met:"Familias que nombran a otro menor sobre familias que responden",resp:"Ana",cad:"En la misma conversación",pz:["P-13 Mensaje de efecto llamada"],hz:["WhatsApp Business"]},
+ {t:"Segundo impacto",obj:"Recuperar a quien no respondió",pub:"Familias sin respuesta a los siete días",acc:"Que entren a mirar la oferta del curso",can:"WhatsApp",men:"Este curso hemos abierto grupos nuevos. Por si os encaja.",cta:"Mira los horarios de este curso",dat:"Clic en el enlace",av:"Entra en el enlace o responde",met:"Respuestas del segundo impacto sobre reenviados",resp:"Ángela",cad:"Día 9 de septiembre",pz:["P-14 Segundo impacto de recaptación"],hz:["WhatsApp Business"]},
+ {t:"Matrícula",obj:"Alta del alumno, sea el original u otro de la familia",pub:"Familia interesada",acc:"Que complete el formulario",can:"Formulario web",men:"—",cta:"Completa la inscripción",dat:"Alta con origen «recaptación» y si es el alumno original u otro menor",av:"Formulario enviado",met:"Altas sobre familias contactadas · reparto entre alumno original y otro menor",resp:"Lucía",cad:"Diaria",pz:["P-04 Formulario de inscripción"],hz:["Google Forms","Holded"]}]},
+
+{id:"e5",n:5,col:"b",nombre:"Colegios activos",sub:"Los que ya operan este curso",
+ intro:"El de mayor volumen del sistema. Aquí no hay sorteo: la familia llega por la actividad, no por un incentivo. El canal es prestado, así que todo depende de que dirección abra la puerta.",
+ meta:["Ana gobierna · Leo ejecuta · Ángela produce","La actividad arranca en octubre","El colegio se lleva el 15 %"],
+ pie:{"Métrica del embudo":"Matrículas por centro","Ratio a vigilar":"Registros sobre alumnos del centro en rango de edad","Cadencia":"Semanal por centro","Bloqueo":"La conversación de oferta con cada dirección"},
+ f:[
+ {t:"Oferta",obj:"Cerrar catálogo y precios centro por centro",pub:"Dirección del centro",acc:"Que confirme qué actividades salen este curso",can:"Llamada",men:"Repasamos qué actividades sacamos este curso.",cta:"¿Mantenemos las del año pasado o revisamos el catálogo?",dat:"Actividades confirmadas · precios · fechas · persona de contacto",av:"Catálogo y precios confirmados por escrito",met:"Centros con oferta cerrada sobre centros activos",resp:"Ana",cad:"Una llamada por centro, antes del 5 de septiembre",pz:[],hz:["Teléfono","Excel en Drive"]},
+ {t:"Producción",obj:"Tener el material listo antes de que empiece el curso",pub:"Interno",acc:"Que cada centro tenga su cartel con su enlace",can:"—",men:"—",cta:"—",dat:"Código de origen por centro",av:"Cartel y enlace generados y revisados",met:"Centros con material listo sobre centros activos",resp:"Ángela produce · Leo genera los enlaces",cad:"Semana del 1 de septiembre",pz:["P-15 Cartel de actividades","P-16 Texto de envío"],hz:["Canva","Agente de marketing","Google Forms","Generador de QR"]},
+ {t:"Difusión",obj:"Llegar a la familia a través del centro",pub:"Todas las familias del centro",acc:"Que vean el cartel y entren en el enlace",can:"Circular del centro · grupo de la AMPA · cartel físico",men:"Estas son las actividades de este curso en el colegio de tu hijo.",cta:"Apunta a tu hijo aquí",dat:"Alumnos del centro en rango de edad, para el denominador",av:"El centro ha difundido",met:"Centros que difunden sobre centros activos",resp:"Leo y Ana",cad:"Primera semana de curso",pz:["P-15 Cartel de actividades","P-16 Texto de envío"],hz:["Correo","WhatsApp Business","Cartelería impresa"]},
+ {t:"Inscripción",obj:"Cerrar el alta con origen identificado",pub:"Familia interesada",acc:"Que complete el formulario",can:"Formulario web",men:"—",cta:"Completa la inscripción",dat:"Alumno · centro · actividad · hermanos · domiciliación · código de origen",av:"Formulario enviado",met:"Registros sobre alumnos en rango · matrículas sobre registros",resp:"Ana y Lucía",cad:"Revisión diaria de la hoja",pz:["P-04 Formulario de inscripción"],hz:["Google Forms","Holded"]},
+ {t:"Invitación",obj:"Llenar el grupo con quien no se decidió a tiempo",pub:"Familias del centro que no se han inscrito",acc:"Que el niño asista a la primera clase",can:"Nota del centro · WhatsApp",men:"La primera clase es abierta. Que venga y lo pruebe.",cta:"Confirma que viene",dat:"Confirmación de asistencia",av:"Confirma o asiste",met:"Asistentes sobre invitados · matrículas sobre asistentes",resp:"Ana",cad:"Antes de cada inicio de actividad",pz:["P-17 Invitación a primera clase","P-18 Formulario de confirmación"],hz:["Google Forms","WhatsApp Business"]},
+ {t:"Cierre de grupo",obj:"Confirmar que el grupo sale o reaccionar si no",pub:"Interno y dirección",acc:"Decidir si se abre, se refuerza o se cae",can:"—",men:"—",cta:"—",dat:"Inscritos por actividad frente al mínimo de grupo",av:"Grupo confirmado o descartado",met:"Grupos formados sobre actividades ofertadas",resp:"Ana con Leo",cad:"Corte semanal hasta el inicio",pz:[],hz:["Holded","Excel en Drive"]}]},
+
+{id:"e6",n:6,col:"b",nombre:"Jornadas en colegios",sub:"Ex-clientes · aquí vive el sorteo",
+ intro:"El niño prueba la actividad en horario lectivo y la pide en casa. Es la única acción presencial del sistema, y por eso es donde el sorteo tiene sentido: sirve para captar datos de familias que hoy no están en la base.",
+ meta:["Leo ejecuta · Ángela produce","15 – 30 de septiembre","Con sorteo"],
+ pie:{"Métrica del embudo":"Grupos formados por jornada","Ratio clave":"Registros sobre alumnos impactados","Cadencia":"Por jornada, y semanal en el plazo de inscripción","Bloqueo":"Los textos legales de consentimiento y de imagen"},
+ f:[
+ {t:"Selección",obj:"Elegir dónde merece la pena montar jornada",pub:"Interno",acc:"Priorizar por potencial real",can:"—",men:"—",cta:"—",dat:"Alumnos del centro · histórico con Proeduco · encaje del catálogo",av:"Centro priorizado",met:"Centros seleccionados sobre ex-clientes",resp:"Pedro y Leo",cad:"Una vez, antes del 10 de septiembre",pz:[],hz:["Excel en Drive"]},
+ {t:"Propuesta",obj:"Que dirección acepte la jornada",pub:"Dirección del centro",acc:"Que fije fecha",can:"Correo y llamada",men:"Traemos las actividades al colegio para que los niños las prueben.",cta:"¿Qué día os viene bien?",dat:"Fecha · cursos participantes · aulas · contacto",av:"Fecha cerrada por escrito",met:"Jornadas aceptadas sobre centros contactados",resp:"Leo",cad:"Correo y llamada de seguimiento a las 72 h",pz:["P-19 Correo de propuesta de jornada","P-20 Guion de llamada a dirección"],hz:["Correo","Teléfono","Holded"]},
+ {t:"Aviso previo",obj:"Que la familia sepa antes de que ocurra",pub:"Familias del centro",acc:"Que estén sobre aviso y pregunten al niño",can:"Canal del centro",men:"El jueves vuestros hijos van a probar estas actividades en clase.",cta:"Preguntadle qué tal le ha ido",dat:"—",av:"El centro ha enviado el aviso",met:"Centros con aviso enviado sobre jornadas",resp:"Ángela produce · Leo lo entrega",cad:"Tres días antes de la jornada",pz:["P-21 Aviso previo a familias"],hz:["Agente de marketing","Correo"]},
+ {t:"Jornada y registro",obj:"Que el niño lo pruebe y que la familia se registre",pub:"Alumnos en aula · familias en casa",acc:"Que el padre escanee el QR y se registre para el sorteo",can:"Presencial en aula · tríptico con QR a la mochila",men:"Hoy tu hijo ha probado esto. Regístrate y entra en el sorteo.",cta:"Escanea y participa en el sorteo",dat:"Nombre · teléfono · correo · niño y edad · código de origen · consentimiento",av:"Registro enviado",met:"Registros sobre alumnos impactados",resp:"Leo",cad:"El día de la jornada",pz:["P-22 Tríptico de jornada con QR","P-23 Bases del sorteo","P-04 Formulario de inscripción"],hz:["Google Forms","Generador de QR","Cartelería impresa","Cámara o móvil"]},
+ {t:"Cierre y prueba",obj:"Cerrar el círculo y dar prueba de lo ocurrido",pub:"Familias del centro",acc:"Que vean a sus hijos y se decidan",can:"Canal del centro · WhatsApp",men:"Así fue la jornada en vuestro colegio.",cta:"Apunta a tu hijo antes del [fecha]",dat:"Clic en el enlace de inscripción",av:"Entra en el formulario",met:"Inscripciones sobre registros",resp:"Ángela",cad:"En las 48 h siguientes a la jornada",pz:["P-24 Comunicación de cierre con fotos"],hz:["Canva","Correo","Cámara o móvil"]},
+ {t:"Plazo y grupo",obj:"Convertir el interés en grupo",pub:"Registrados que no se han inscrito",acc:"Que completen la inscripción antes del cierre",can:"WhatsApp · canal del centro",men:"Quedan pocos días para apuntarse a las actividades.",cta:"Completa la inscripción",dat:"Inscritos por actividad frente al mínimo",av:"Grupo confirmado",met:"Grupos formados por jornada · matrículas sobre registros",resp:"Ana con Leo",cad:"Dos recordatorios en el plazo, y corte semanal",pz:["P-25 Recordatorio de plazo"],hz:["WhatsApp Business","Holded"]}]},
+
+{id:"e7",n:7,col:"b",nombre:"Colegios nuevos",sub:"Del listado de prospección",
+ intro:"El embudo más largo: centros que no os conocen y a los que hay que convencer desde cero. Es probable que para este curso no dé tiempo, y está asumido: su valor está en el curso siguiente.",
+ meta:["Leo","Listado de prospección","Puede no llegar a este curso"],
+ pie:{"Métrica del embudo":"Jornadas conseguidas sobre centros contactados","Ratio a vigilar":"Respuestas sobre correos enviados","Cadencia":"Semanal","Nota":"Su resultado se mide en la campaña 2027-28"},
+ f:[
+ {t:"Selección",obj:"Decidir a cuáles se llama de verdad",pub:"Interno",acc:"Acotar el listado a lo abarcable",can:"—",men:"—",cta:"—",dat:"Alumnos · titularidad · zona · contacto de dirección",av:"Centro priorizado y asignado",met:"Centros priorizados sobre listado total",resp:"Pedro y Leo",cad:"Una vez",pz:[],hz:["Excel en Drive","Holded"]},
+ {t:"Apertura",obj:"Conseguir que dirección conteste",pub:"Dirección de centros que no nos conocen",acc:"Que respondan o al menos abran",can:"Correo",men:"Trabajamos las extraescolares de varios colegios de la zona.",cta:"¿Os viene bien que os llame esta semana?",dat:"Envío y respuesta registrados",av:"Responde",met:"Respuestas sobre envíos",resp:"Leo",cad:"Envío y registro el mismo día",pz:["P-26 Correo de prospección"],hz:["Correo","Holded"]},
+ {t:"Llamada",obj:"Pasar del correo a la conversación",pub:"Dirección contactada",acc:"Que acepten escuchar la propuesta",can:"Teléfono",men:"—",cta:"¿Os enseño cómo lo hacemos en otros centros?",dat:"Resultado de la llamada y motivo si es no",av:"Acepta recibir la propuesta",met:"Conversaciones sobre llamadas realizadas",resp:"Leo",cad:"A las 72 h del correo",pz:["P-20 Guion de llamada a dirección"],hz:["Teléfono","Holded"]},
+ {t:"Propuesta",obj:"Que acepten una jornada de prueba",pub:"Dirección interesada",acc:"Que fijen fecha",can:"Correo",men:"Vamos, lo montamos y vuestros alumnos lo prueban. Sin compromiso.",cta:"¿Qué día os viene bien?",dat:"Fecha comprometida",av:"Fecha cerrada",met:"Jornadas aceptadas sobre propuestas",resp:"Leo",cad:"Seguimiento semanal",pz:["P-19 Correo de propuesta de jornada"],hz:["Correo","Holded"]},
+ {t:"Jornada",obj:"A partir de aquí, idéntico al embudo 6",pub:"Alumnos y familias del centro",acc:"Las mismas que en el embudo 6",can:"Las mismas",men:"Las mismas",cta:"Las mismas",dat:"Los mismos",av:"El mismo",met:"Los mismos",resp:"Leo",cad:"La misma",pz:[],hz:[]}]},
+
+{id:"e8",n:8,col:"c",nombre:"Taller de arrastre",sub:"Del espacio ajeno a vuestra aula",
+ intro:"En espera. El taller todavía no está definido como servicio: faltan el nombre, la promesa, los umbrales económicos y qué gana el espacio que os acoge. Hasta tenerlos no puede diseñarse el embudo ni producirse sus materiales.",
+ meta:["En espera","Fase 2","9 materiales pendientes"],
+ pie:{"Estado":"En espera hasta que el servicio esté definido","Qué falta":"El nombre, la promesa, los umbrales económicos y qué gana el espacio anfitrión","Estructura prevista":"Tres ventas encadenadas: al espacio, para llenar el taller y para la cuota","Nota":"Se diseñará en cuanto el servicio quede definido"},
+ f:[]},
+
+{id:"e9",n:9,col:"d",nombre:"Taller de implantación",sub:"Aula recurrente en el espacio ajeno",
+ intro:"En espera por el mismo motivo, y además pendiente de calcular cuántos alumnos hacen falta para que un aula en un espacio ajeno se sostenga.",
+ meta:["En espera","Fase 2","Pendiente el umbral"],
+ pie:{"Estado":"En espera hasta que el servicio esté definido","Qué falta":"Además de lo anterior, la fórmula económica con el anfitrión","Valor propio":"Es el único embudo que abre zona geográfica nueva","Nota":"Se diseñará en cuanto el servicio quede definido"},
+ f:[]}
+];
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function el(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+
+var filas={a:document.getElementById('fila-a'),b:document.getElementById('fila-b'),c:document.getElementById('fila-c'),d:document.getElementById('fila-d')};
+E.forEach(function(x){
+  var b=el('button','emb'); b.type='button'; b.dataset.f=x.id; b.setAttribute('aria-pressed','false');
+  b.innerHTML='<span class="emb__n'+(x.n>7?' emb__n--x':'')+'">'+x.n+'</span>'+
+    '<span><span class="emb__t">'+esc(x.nombre)+'</span><span class="emb__s">'+esc(x.sub)+'</span></span>'+
+    '<span class="emb__p"><b>'+(x.f.length||'—')+'</b>'+(x.f.length?'fases':'en espera')+'</span>';
+  filas[x.col].appendChild(b);
+});
+
+var cont=document.getElementById('render');
+E.forEach(function(x){
+  var d=el('div','ficha'); d.dataset.p=x.id; d.hidden=true;
+  var cab=el('div','f-cab');
+  cab.innerHTML='<span class="label">Embudo '+x.n+' · '+(x.n<8?(x.col==='a'?'Canal propio':'Canal prestado'):'Fase 2')+'</span>'+
+    '<h3>'+esc(x.nombre)+'</h3><p>'+esc(x.intro)+'</p><div class="f-meta">'+
+    x.meta.map(function(m,i){return '<span class="chip'+(i===0?'':(i===x.meta.length-1?' chip--l':' chip--n'))+'">'+esc(m)+'</span>';}).join('')+'</div>';
+  d.appendChild(cab);
+
+  x.f.forEach(function(f,i){
+    var p=el('div','paso');
+    p.innerHTML=
+      '<div class="paso__rail"><span class="paso__n">'+(i+1)+'</span><span class="paso__linea"></span></div>'+
+      '<div class="paso__c">'+
+        '<div class="paso__cab"><h4>'+esc(f.t)+'</h4><span class="resp">'+esc(f.resp)+' · <b>'+esc(f.cad)+'</b></span></div>'+
+        '<div class="tri">'+
+          '<div class="celda"><b>Objetivo</b><p>'+esc(f.obj)+'</p></div>'+
+          '<div class="celda"><b>Público</b><p>'+esc(f.pub)+'</p></div>'+
+          '<div class="celda"><b>Acción que buscamos</b><p>'+esc(f.acc)+'</p></div>'+
+        '</div>'+
+        '<div class="mensaje">'+
+          '<div><b>Canal y mensaje</b><p style="font-family:var(--util);font-size:.8rem;margin-bottom:.4rem">'+esc(f.can)+'</p>'+
+            (f.men!=='—'?'<p class="txt">'+esc(f.men)+'</p>':'<p style="font-size:.86rem;color:var(--gris-medio)">Sin mensaje: es una fase interna</p>')+'</div>'+
+          '<div><b>Llamada a la acción</b><p class="cta">'+esc(f.cta)+'</p></div>'+
+        '</div>'+
+        '<div class="duo">'+
+          '<div class="celda"><b>Datos que capturamos</b><p>'+esc(f.dat)+'</p></div>'+
+          '<div class="celda"><b>Criterio de avance</b><p>'+esc(f.av)+'</p></div>'+
+        '</div>'+
+        '<div class="celda" style="border-top:1px solid var(--linea-suave)"><b>Métrica y ratio</b><p>'+esc(f.met)+'</p></div>'+
+        '<div class="paso__pie">'+
+          '<div><b>Piezas</b>'+(f.pz.length?f.pz.map(function(z){return '<span class="pz">'+esc(z)+'</span>';}).join(''):'<span class="pz pz--x">Ninguna</span>')+'</div>'+
+          '<div><b>Recursos</b>'+(f.hz.length?f.hz.map(function(z){return '<span class="hz">'+esc(z)+'</span>';}).join(''):'<span class="hz">Los del embudo 6</span>')+'</div>'+
+        '</div>'+
+      '</div>';
+    d.appendChild(p);
+  });
+
+  var pie=el('div','f-pie');
+  pie.innerHTML=Object.keys(x.pie).map(function(k){return '<div><strong>'+esc(k)+'</strong>'+esc(x.pie[k])+'</div>';}).join('');
+  d.appendChild(pie);
+  cont.appendChild(d);
+});
+
+var btns=Array.prototype.slice.call(document.querySelectorAll('.emb'));
+var fichas=Array.prototype.slice.call(document.querySelectorAll('.ficha'));
+function mostrar(id,mover){
+  btns.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.f===id?'true':'false');});
+  fichas.forEach(function(f){f.hidden=f.dataset.p!==id;});
+  if(mover){var s=document.getElementById('fichas'); if(s)s.scrollIntoView({behavior:'smooth',block:'start'});}
+}
+btns.forEach(function(b,i){
+  b.addEventListener('click',function(){mostrar(b.dataset.f,true);});
+  b.addEventListener('keydown',function(e){
+    var dd=e.key==='ArrowDown'?1:(e.key==='ArrowUp'?-1:0);
+    if(!dd)return; e.preventDefault();
+    btns[(i+dd+btns.length)%btns.length].focus();
+  });
+});
+mostrar('e1',false);
+})();
+</script>
+
+</html>

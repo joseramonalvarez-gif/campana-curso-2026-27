@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<title>Kanban de la campaña</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&family=Manrope:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --blanco:#FFFFFF; --negro:#000000; --amarillo:#E8C223;
+  --gris-medio:#808285; --gris-claro:#F6F6F6;
+  --linea:rgba(0,0,0,.10); --linea-suave:rgba(0,0,0,.06); --tinte:rgba(232,194,35,.08);
+  --sombra:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
+  --display:"Sarabun", Georgia, serif;
+  --texto:"Sarabun", -apple-system, "Segoe UI", sans-serif;
+  --util:"Manrope", -apple-system, "Segoe UI", sans-serif;
+  --max:1280px; --r:12px;
+}
+*{box-sizing:border-box}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.001ms !important}}
+body{margin:0;background:var(--blanco);color:var(--negro);font-family:var(--texto);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance;line-height:1.2}
+p{margin:0 0 .75rem}p:last-child{margin-bottom:0}
+.label{font-family:var(--util);font-weight:600;font-size:.66rem;text-transform:uppercase;letter-spacing:.11em;color:var(--gris-medio)}
+.chip{display:inline-block;font-family:var(--util);font-weight:600;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;padding:.24em .62em;border-radius:999px;background:var(--amarillo);color:var(--negro);white-space:nowrap}
+.chip--n{background:var(--gris-claro);color:var(--gris-medio);border:1px solid var(--linea)}
+
+.topbar{position:sticky;top:0;z-index:70;background:rgba(255,255,255,.96);backdrop-filter:saturate(150%) blur(10px);border-bottom:1px solid var(--linea-suave)}
+.topbar__in{max-width:var(--max);margin:0 auto;padding:.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem}
+.topbar__logo{height:32px;width:auto;display:block}
+.topbar__code{font-family:var(--util);font-size:.7rem;letter-spacing:.06em;font-weight:600;color:var(--gris-medio);white-space:nowrap}
+
+.wrap{max-width:var(--max);margin:0 auto;padding:0 1.5rem 4rem}
+.hero{padding:2.4rem 0 1.6rem}
+.hero__rule{width:60px;height:5px;background:var(--amarillo);border-radius:999px;margin-bottom:1.2rem}
+.hero h1{font-size:clamp(1.8rem,3.8vw,2.5rem);letter-spacing:-.02em;margin-bottom:.7rem;max-width:18ch}
+.hero__sub{font-size:1.02rem;color:var(--gris-medio);max-width:64ch}
+
+.ayuda{background:var(--gris-claro);border-left:4px solid var(--amarillo);border-radius:var(--r);padding:1.1rem 1.35rem;margin-top:1.2rem}
+.ayuda h3{font-size:.95rem;margin-bottom:.4rem}
+.ayuda p{font-size:.88rem;color:var(--gris-medio);margin:0 0 .5rem}
+.ayuda p:last-child{margin:0}
+.ayuda strong{color:var(--negro)}
+
+.barra-f{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;background:var(--gris-claro);border:1px solid var(--linea-suave);border-radius:var(--r);padding:.75rem 1rem;margin:1.4rem 0 1.2rem;position:sticky;top:57px;z-index:60}
+.filtro{font-family:var(--util);font-weight:600;font-size:.73rem;background:var(--blanco);border:1px solid var(--linea);color:var(--gris-medio);padding:.4rem .85rem;border-radius:999px;cursor:pointer;transition:all .16s ease}
+.filtro:hover{color:var(--negro);border-color:var(--negro)}
+.filtro[aria-pressed="true"]{background:var(--amarillo);border-color:var(--amarillo);color:var(--negro)}
+.filtro:focus-visible,.tarjeta:focus-visible{outline:2px solid var(--negro);outline-offset:2px}
+.barra-f__c{margin-left:auto;font-family:var(--util);font-size:.74rem;color:var(--gris-medio)}
+.barra-f__c b{color:var(--negro);font-weight:600}
+
+.tablero{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:.9rem;overflow-x:auto;padding-bottom:.6rem}
+.col{background:var(--gris-claro);border:1px solid var(--linea-suave);border-radius:var(--r);padding:.7rem;min-width:210px}
+.col--bloq{background:var(--tinte);border-color:var(--amarillo)}
+.col__cab{display:flex;align-items:baseline;gap:.5rem;padding:.15rem .3rem .7rem;position:sticky;top:0}
+.col__cab h3{font-size:.8rem;font-family:var(--util);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.col__n{margin-left:auto;font-family:var(--util);font-size:.72rem;font-weight:600;background:var(--blanco);border:1px solid var(--linea);border-radius:999px;padding:.1em .5em;font-variant-numeric:tabular-nums}
+.col__lista{display:grid;gap:.5rem}
+.col__vacia{font-family:var(--util);font-size:.72rem;color:var(--gris-medio);text-align:center;padding:1rem .4rem}
+
+.tarjeta{display:block;width:100%;text-align:left;background:var(--blanco);border:1px solid var(--linea-suave);border-radius:10px;padding:.65rem .75rem;cursor:pointer;font-family:var(--texto);color:var(--negro);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.tarjeta:hover{border-color:var(--negro);box-shadow:var(--sombra);transform:translateY(-1px)}
+.tarjeta[hidden]{display:none}
+.tarjeta__sup{display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem}
+.tarjeta__id{font-family:var(--util);font-size:.6rem;font-weight:600;color:var(--gris-medio)}
+.tarjeta__f{margin-left:auto;font-family:var(--util);font-size:.6rem;font-weight:600;background:var(--amarillo);border-radius:4px;padding:.1em .38em;white-space:nowrap}
+.tarjeta__f--sin{background:var(--gris-claro);color:var(--gris-medio);border:1px solid var(--linea)}
+.tarjeta__t{font-size:.85rem;font-weight:600;line-height:1.32;display:block;margin-bottom:.35rem}
+.tarjeta__pie{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.tarjeta__r{font-family:var(--util);font-size:.66rem;color:var(--gris-medio)}
+.tarjeta__emb{font-family:var(--util);font-size:.6rem;color:var(--gris-medio);border:1px solid var(--linea);border-radius:4px;padding:.08em .34em}
+
+.ficha{position:fixed;inset:0;background:rgba(0,0,0,.35);display:grid;place-items:center;padding:1.5rem;z-index:100}
+.ficha[hidden]{display:none}
+.ficha__caja{background:var(--blanco);border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.25);max-width:640px;width:100%;max-height:88vh;overflow-y:auto}
+.ficha__cab{padding:1.1rem 1.4rem;border-bottom:1px solid var(--linea-suave);display:flex;align-items:flex-start;gap:1rem}
+.ficha__cab h3{font-size:1.1rem;margin-bottom:.25rem}
+.ficha__cab .label{display:block}
+.cerrar{margin-left:auto;background:var(--gris-claro);border:1px solid var(--linea);border-radius:999px;width:30px;height:30px;cursor:pointer;font-family:var(--util);font-size:.9rem;line-height:1;color:var(--gris-medio);flex:none}
+.cerrar:hover{color:var(--negro);border-color:var(--negro)}
+.ficha__campos{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--linea-suave)}
+.campo{background:var(--blanco);padding:.8rem 1.4rem}
+.campo--ancho{grid-column:1 / -1}
+.campo > b{font-family:var(--util);font-size:.58rem;text-transform:uppercase;letter-spacing:.09em;color:var(--gris-medio);display:block;margin-bottom:.25rem;font-weight:600}
+.campo p{font-size:.87rem;margin:0}
+.campo--paso{background:var(--tinte)}
+.campo--paso p{font-weight:600}
+
+.leyenda{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem;margin-top:1.6rem}
+.leyenda div{background:var(--blanco);border:1px solid var(--linea-suave);border-radius:var(--r);padding:.9rem 1.1rem}
+.leyenda b{font-family:var(--util);font-size:.72rem;font-weight:600;display:block;margin-bottom:.25rem}
+.leyenda span{font-size:.84rem;color:var(--gris-medio)}
+
+footer{border-top:1px solid var(--linea);margin-top:2.5rem}
+.footer__in{max-width:var(--max);margin:0 auto;padding:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:space-between}
+.footer__l{display:flex;align-items:center;gap:.7rem}
+.footer__ico{height:24px;width:auto}
+.footer__t{font-family:var(--util);font-size:.7rem;color:var(--gris-medio);letter-spacing:.05em}
+
+@media (max-width:900px){
+  .tablero{grid-template-columns:repeat(6,minmax(190px,1fr))}
+  .ficha__campos{grid-template-columns:1fr}
+  .barra-f{position:static}
+}
+@media print{
+  .topbar,.barra-f,.ficha{display:none}
+  .tablero{grid-template-columns:repeat(2,1fr);overflow:visible}
+  .col,.tarjeta,.leyenda div{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+  body{font-size:9pt}
+  @page{size:A4 landscape;margin:10mm}
+  *{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+.ayuda__ojo{margin-top:.7rem;padding-top:.7rem;border-top:1px solid rgba(0,0,0,.14)}
+
+</style>
+<style>
+.na-volver{background:#000;color:#fff;font-family:"Manrope",-apple-system,"Segoe UI",sans-serif;font-size:.78rem;font-weight:600;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.na-volver__in{max-width:1280px;margin:0 auto;padding:.58rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.na-volver a{color:#E8C223;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem}
+.na-volver a:hover{text-decoration:underline}
+.na-volver a:focus-visible{outline:2px solid #E8C223;outline-offset:3px}
+.na-volver span{color:rgba(255,255,255,.55);font-weight:500}
+@media (max-width:560px){.na-volver span{display:none}}
+@media print{.na-volver{display:none}}
+</style>
+<div class="na-volver"><div class="na-volver__in">
+<a href="./">&larr; Volver al índice de la entrega</a>
+<span>Campaña de curso escolar 2026/27 · Proeduco</span>
+</div></div>
+
+
+<header class="topbar">
+  <div class="topbar__in">
+    <img class="topbar__logo" src="data:image/jpeg;base64,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" alt="Nevada &amp; Amurai · Consultores y Abogados">
+    <span class="topbar__code">NA-PROEDUCO-PLAN-2026-08-25-D</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div class="hero__rule"></div>
+    <h1>Kanban de la campaña</h1>
+    <p class="hero__sub">Todo lo que hay que hacer, en tarjetas. Cada una dice qué es, para qué sirve, quién la hace, de qué depende y cuál es el siguiente paso.</p>
+    <div class="ayuda">
+      <h3>Cómo se lee este tablero</h3>
+      <p><strong>Pincha en cualquier tarjeta</strong> y se abre con todo el detalle: para qué sirve, de qué depende, qué hay que hacer exactamente y en qué documento está la información. Se cierra con la X, pinchando fuera o con la tecla Escape.</p>
+      <p><strong>Los botones de arriba filtran por persona.</strong> Pincha tu nombre y el tablero se queda solo con tus tareas. «Todas» lo devuelve entero.</p>
+      <p><strong>Empieza por la columna Bloqueado.</strong> Ahí están las decisiones que tienen parado al resto: mientras no se resuelvan, producir otras cosas no adelanta la campaña.</p>
+      <p class="ayuda__ojo"><strong>Este tablero es una foto, no se mueve solo.</strong> No hace falta que lo actualicéis ni que arrastréis nada: no se puede, y no pasa nada. Refleja la situación del día en que se hizo. <strong>El estado real se pone al día en la revisión de los lunes</strong>, y de ahí sale el tablero actualizado. Lo que sí hace falta es que cada uno llegue al lunes sabiendo qué ha terminado, qué tiene a medias y qué le ha bloqueado.</p>
+    </div>
+  </section>
+
+  <div class="barra-f" id="filtros">
+    <button class="filtro" type="button" data-f="todas" aria-pressed="true">Todas</button>
+    <button class="filtro" type="button" data-f="Ana">Ana</button>
+    <button class="filtro" type="button" data-f="Ángela">Ángela</button>
+    <button class="filtro" type="button" data-f="Leo">Leo</button>
+    <button class="filtro" type="button" data-f="Lucía">Lucía</button>
+    <button class="filtro" type="button" data-f="Pedro">Pedro</button>
+    <span class="barra-f__c"><b id="cnt">0</b> tareas a la vista</span>
+  </div>
+
+  <div class="tablero" id="tablero"></div>
+
+  <div class="leyenda">
+    <div><b>Bloqueado</b><span>Está parada porque falta algo que no depende de quien la tiene. Siempre dice qué falta y quién lo desbloquea.</span></div>
+    <div><b>Pendiente</b><span>Hay que hacerla, pero todavía no toca: espera a una fecha o a que termine otra tarea.</span></div>
+    <div><b>Preparada</b><span>Se puede empezar ahora mismo. No falta nada ni depende de nadie.</span></div>
+    <div><b>En curso</b><span>Alguien está trabajando en ella hoy.</span></div>
+    <div><b>Por validar</b><span>Está hecha y espera el visto bueno antes de darse por buena.</span></div>
+    <div><b>Terminada</b><span>Hecha y validada. No se vuelve a tocar.</span></div>
+  </div>
+
+</div>
+
+<div class="ficha" id="ficha" hidden>
+  <div class="ficha__caja" id="ficha-caja"></div>
+</div>
+
+<footer>
+  <div class="footer__in">
+    <div class="footer__l">
+      <img class="footer__ico" src="data:image/png;base64,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" alt="">
+      <span class="footer__t">Nevada &amp; Amurai · Consultores y Abogados</span>
+    </div>
+    <span class="footer__t">NA-PROEDUCO-PLAN-2026-08-25-D · Documento de trabajo · Confidencial</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+var COLS=[
+ {k:"bloq",n:"Bloqueado"},
+ {k:"prep",n:"Preparada"},
+ {k:"pend",n:"Pendiente"},
+ {k:"curso",n:"En curso"},
+ {k:"val",n:"Por validar"},
+ {k:"fin",n:"Terminada"}
+];
+
+var T=[
+/* ---- BLOQUEADO: decisiones que tienen parado al resto ---- */
+{id:"T-01",c:"bloq",t:"Decidir los precios del curso 2026-27",emb:"Familias",fase:"Preparación",r:"Pedro",f:"Hoy",
+ obj:"Sin precios no hay ventana de precio, ni circular, ni campaña de renovación.",
+ dep:"No depende de nada. Es una decisión.",falta:"La decisión de Pedro.",
+ paso:"Pedro fija los precios y se los pasa a Ángela por escrito.",
+ ref:"Bloquea T-26, T-27, T-28, T-30 y los envíos T-42 a T-44."},
+{id:"T-02",c:"bloq",t:"Cerrar el catálogo y los precios con cada colegio",emb:"Colegios",fase:"Oferta",r:"Ana",f:"Antes del 5 sep",
+ obj:"Saber qué actividades salen este curso en cada centro y a qué precio.",
+ dep:"Una llamada a la dirección de cada uno de los centros activos.",falta:"Las llamadas.",
+ paso:"Ana llama centro por centro y anota lo acordado en la hoja de centros.",
+ ref:"Bloquea T-35 y T-36. Sin esto no se puede producir ni un cartel."},
+{id:"T-03",c:"bloq",t:"Decidir qué se le da a quien trae a otra familia",emb:"Referidos",fase:"Mecánica",r:"Pedro",f:"Antes del 1 sep",
+ obj:"La campaña de referidos se comunica en la primera circular, así que hay que saberlo antes.",
+ dep:"No depende de nada. Es una decisión.",falta:"La decisión de Pedro.",
+ paso:"Pedro decide en qué consiste el reconocimiento y se lo dice a Ángela.",
+ ref:"Bloquea T-29 y T-34."},
+{id:"T-04",c:"bloq",t:"Conseguir el texto de consentimiento de datos",emb:"Todos",fase:"Preparación",r:"Pedro",f:"Hoy",
+ obj:"El formulario recoge datos de familias y de menores. Sin ese texto no se puede publicar.",
+ dep:"Hay que pedirlo a quien lleve la protección de datos de Proeduco.",falta:"El texto.",
+ paso:"Pedro lo pide y, en cuanto lo tenga, se lo pasa a Leo para meterlo en el formulario.",
+ ref:"Bloquea la publicación del formulario y de todos los códigos QR."},
+{id:"T-05",c:"bloq",t:"Conseguir la autorización de imagen de menores",emb:"Jornadas y redes",fase:"Preparación",r:"Pedro",f:"Antes del 15 sep",
+ obj:"Sin ella no se puede fotografiar en las jornadas ni publicar nada con niños.",
+ dep:"Hay que pedirlo a quien lleve la protección de datos de Proeduco.",falta:"El texto.",
+ paso:"Pedro lo pide. Mientras no esté, las fotos se hacen sin rostros.",
+ ref:"Bloquea T-39 y buena parte del contenido de redes."},
+{id:"T-06",c:"bloq",t:"Conseguir las bases del sorteo",emb:"Jornadas",fase:"Registro",r:"Pedro",f:"Antes del 15 sep",
+ obj:"El sorteo de las jornadas necesita bases publicadas antes de anunciarse.",
+ dep:"Es un texto legal: no lo escribimos ni nosotros ni el agente.",falta:"El texto.",
+ paso:"Pedro lo pide a la asesoría y se enlaza desde el formulario.",
+ ref:"Bloquea T-38. No se imprime ningún tríptico sin esto."},
+
+/* ---- PREPARADA: se puede empezar ya ---- */
+{id:"T-07",c:"prep",t:"Montar el formulario de campaña",emb:"Todos",fase:"Preparación",r:"Leo",f:"Antes del 1 sep",
+ obj:"Es la pieza de la que cuelga todo: todas las comunicaciones llevan su enlace.",
+ dep:"Se puede montar ya. Para publicarlo hace falta T-04.",falta:"—",
+ paso:"Leo lo monta siguiendo el documento del formulario, paso a paso.",
+ ref:"Documento «El formulario y los códigos QR», apartados 1 y 2."},
+{id:"T-08",c:"prep",t:"Crear la tabla de códigos y los enlaces",emb:"Todos",fase:"Preparación",r:"Leo",f:"Antes del 1 sep",
+ obj:"Cada acción tiene su enlace propio. Es lo que permite saber de dónde viene cada inscripción.",
+ dep:"Necesita el formulario montado (T-07).",falta:"—",
+ paso:"Leo genera un enlace prellenado por cada origen y los guarda en una hoja.",
+ ref:"Documento del formulario, apartados 3 y 4."},
+{id:"T-09",c:"prep",t:"Generar los códigos QR de papel",emb:"Colegios",fase:"Producción",r:"Leo",f:"Antes del 10 sep",
+ obj:"Solo para cartel y tríptico. Las piezas digitales no llevan QR.",
+ dep:"Necesita los enlaces (T-08).",falta:"—",
+ paso:"Leo genera un QR por enlace de papel y comprueba cada uno con el móvil.",
+ ref:"Documento del formulario, apartado 4, paso 6."},
+{id:"T-10",c:"prep",t:"Preparar la hoja de seguimiento",emb:"Todos",fase:"Preparación",r:"Ana",f:"Antes del 1 sep",
+ obj:"Que cada registro tenga estado, responsable y fecha de contacto.",
+ dep:"Necesita el formulario montado (T-07).",falta:"—",
+ paso:"Ana añade las columnas de seguimiento a la derecha de las respuestas.",
+ ref:"Documento del formulario, apartado 6."},
+{id:"T-11",c:"prep",t:"Crear la hoja de exposición",emb:"Todos",fase:"Preparación",r:"Leo",f:"Antes del 1 sep",
+ obj:"Anotar a cuánta gente se llega en cada acción. Sin ese número, los registros no se pueden interpretar.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Leo crea una hoja con fecha, código de la acción y personas alcanzadas.",
+ ref:"Documento de gobierno, apartado 1."},
+{id:"T-12",c:"prep",t:"Sacar el listado de familias activas",emb:"Renovación",fase:"Preparación",r:"Lucía",f:"Antes del 1 sep",
+ obj:"Es la lista a la que se le manda la campaña de renovación.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Lucía exporta las familias del curso pasado con teléfono y servicio.",
+ ref:"Mapa de embudos, embudo 1, fase 1."},
+{id:"T-13",c:"prep",t:"Sacar el listado de antiguos alumnos",emb:"Antiguos alumnos",fase:"Extracción",r:"Lucía",f:"Antes del 1 sep",
+ obj:"Familias que fueron clientes y ya no lo son.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Lucía exporta el histórico con el último curso que hicieron y la edad del niño.",
+ ref:"Mapa de embudos, embudo 4, fase 1."},
+{id:"T-14",c:"prep",t:"Conectar Canva al agente",emb:"Todos",fase:"Preparación",r:"Ángela",f:"Hoy",
+ obj:"Permite que el agente cree las piezas directamente, sin maquetarlas a mano.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Ángela entra en el agente, va a personalizar y conectores, y conecta Canva.",
+ ref:"Catálogo de producción, criterio de formatos."},
+{id:"T-15",c:"prep",t:"Preparar el mensaje para antiguos alumnos",emb:"Antiguos alumnos",fase:"Reapertura",r:"Ángela",f:"Antes del 1 sep",
+ obj:"Reabrir la conversación con familias que hace tiempo que no están.",
+ dep:"Ninguna: no lleva precios ni oferta.",falta:"—",
+ paso:"Ángela abre un chat nuevo y pega el encargo de la comunicación C-11.",
+ ref:"Catálogo de producción, C-11."},
+{id:"T-16",c:"prep",t:"Preparar el mensaje de «¿hay más peques en casa?»",emb:"Antiguos alumnos",fase:"Efecto llamada",r:"Ángela",f:"Antes del 2 sep",
+ obj:"Que la familia diga si hay otro niño que hoy encaje por edad.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Ángela abre un chat nuevo y pega el encargo de C-12.",
+ ref:"Catálogo de producción, C-12."},
+{id:"T-17",c:"prep",t:"Preparar el correo de propuesta de jornada",emb:"Jornadas",fase:"Propuesta",r:"Leo",f:"Antes del 8 sep",
+ obj:"Conseguir que un colegio acepte una jornada de actividades en clase.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Leo abre un chat nuevo y pega el encargo de C-16.",
+ ref:"Catálogo de producción, C-16."},
+{id:"T-18",c:"prep",t:"Preparar la ficha de la jornada",emb:"Jornadas",fase:"Propuesta",r:"Leo",f:"Antes del 8 sep",
+ obj:"Una página que explique la jornada, para adjuntar al correo.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Leo pide la ficha al agente y le dice que la pase a documento con la skill de documentos.",
+ ref:"Catálogo de producción, C-17."},
+{id:"T-19",c:"prep",t:"Preparar el guion de llamada a dirección",emb:"Jornadas",fase:"Llamada",r:"Leo",f:"Antes del 10 sep",
+ obj:"Pasar del correo a una conversación y cerrar una fecha.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Leo abre un chat nuevo y pega el encargo de C-18.",
+ ref:"Catálogo de producción, C-18."},
+{id:"T-20",c:"prep",t:"Preparar el guion de petición de referido",emb:"Referidos",fase:"Petición",r:"Leo",f:"Antes del 10 sep",
+ obj:"Que el monitor consiga un nombre en el momento adecuado.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Leo pide el guion al agente y lo reparte a los monitores.",
+ ref:"Catálogo de producción, C-08."},
+{id:"T-21",c:"prep",t:"Preparar el guion de llamada de rescate",emb:"Renovación",fase:"Rescate",r:"Leo",f:"Antes del 25 sep",
+ obj:"Recuperar a quien no ha renovado y saber por qué no lo ha hecho.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Leo abre un chat nuevo y pega el encargo de C-04.",
+ ref:"Catálogo de producción, C-04."},
+{id:"T-22",c:"prep",t:"Preparar el calendario de redes del trimestre",emb:"Transversal",fase:"Autoridad",r:"Ángela",f:"Antes del 15 sep",
+ obj:"Trece publicaciones, una por semana, con tema y a quién habla cada una.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Ángela abre un chat nuevo y pega el encargo de C-24.",
+ ref:"Catálogo de producción, C-24."},
+{id:"T-23",c:"prep",t:"Preparar el plan de fotos y vídeos propios",emb:"Transversal",fase:"Autoridad",r:"Ángela",f:"Antes del 15 sep",
+ obj:"Saber qué hay que fotografiar en cada actividad y dónde se guarda.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Ángela abre un chat nuevo y pega el encargo de C-26.",
+ ref:"Catálogo de producción, C-26."},
+
+/* ---- PENDIENTE ---- */
+{id:"T-24",c:"pend",t:"Producir la circular de apertura de matrícula",emb:"Renovación",fase:"Apertura",r:"Ángela",f:"1 sep",
+ obj:"Abrir el plazo y que las familias vean que hay una fecha de precio.",
+ dep:"Necesita los precios (T-01).",falta:"—",
+ paso:"Son tres cosas: el texto de dentro, la imagen y el mensaje con el que se envía.",
+ ref:"Catálogo de producción, C-01. Hacen falta tres versiones: ALOHA, Kitsune y deporte."},
+{id:"T-25",c:"pend",t:"Producir el recordatorio de la ventana",emb:"Renovación",fase:"Refuerzo",r:"Ángela",f:"1 sep",
+ obj:"Mover a quien lo está pensando.",dep:"Necesita los precios (T-01).",falta:"—",
+ paso:"Ángela abre un chat nuevo y pega el encargo de C-02.",ref:"Catálogo de producción, C-02."},
+{id:"T-26",c:"pend",t:"Producir el aviso de último día",emb:"Renovación",fase:"Cierre",r:"Ángela",f:"1 sep",
+ obj:"Que quien duda decida hoy.",dep:"Necesita los precios (T-01).",falta:"—",
+ paso:"Ángela abre un chat nuevo y pega el encargo de C-03.",ref:"Catálogo de producción, C-03."},
+{id:"T-27",c:"pend",t:"Producir la campaña de referidos",emb:"Referidos",fase:"Mecánica",r:"Ángela",f:"1 sep",
+ obj:"Que todas las familias sepan que traer a alguien tiene reconocimiento.",
+ dep:"Necesita saber qué se da (T-03).",falta:"—",
+ paso:"Tres cosas: el texto de dentro, la imagen y el mensaje de envío.",ref:"Catálogo de producción, C-07."},
+{id:"T-28",c:"pend",t:"Producir el segundo aviso a antiguos alumnos",emb:"Antiguos alumnos",fase:"Segundo impacto",r:"Ángela",f:"5 sep",
+ obj:"Recuperar a quien no respondió al primer mensaje.",dep:"Necesita los precios (T-01).",falta:"—",
+ paso:"Ángela abre un chat nuevo y pega el encargo de C-13.",ref:"Catálogo de producción, C-13."},
+{id:"T-29",c:"pend",t:"Producir el cartel de cada colegio",emb:"Colegios",fase:"Producción",r:"Ángela",f:"5 sep",
+ obj:"Que las familias del centro vean qué actividades hay y se apunten.",
+ dep:"Necesita la oferta cerrada (T-02) y los enlaces (T-08).",falta:"—",
+ paso:"Una versión por centro. Dos formatos: impresa con QR y digital sin QR.",ref:"Catálogo de producción, C-14."},
+{id:"T-30",c:"pend",t:"Producir la propuesta de segundo hermano",emb:"Segundo hermano",fase:"Propuesta",r:"Ángela",f:"8 sep",
+ obj:"Que la familia que ya está dentro apunte también al pequeño.",dep:"Ninguna.",falta:"—",
+ paso:"Ángela abre un chat nuevo y pega el encargo de C-05.",ref:"Catálogo de producción, C-05."},
+{id:"T-31",c:"pend",t:"Producir la invitación a clase de prueba",emb:"Segundo hermano y referidos",fase:"Prueba",r:"Ángela",f:"8 sep",
+ obj:"Que el niño venga a probar.",dep:"Ninguna.",falta:"—",
+ paso:"Ángela abre un chat nuevo y pega el encargo de C-06.",ref:"Catálogo de producción, C-06."},
+{id:"T-32",c:"pend",t:"Producir el mensaje a la familia referida",emb:"Referidos",fase:"Contacto",r:"Ángela",f:"8 sep",
+ obj:"Llegar a una familia nueva sin que parezca una llamada fría.",dep:"Ninguna.",falta:"—",
+ paso:"Ángela abre un chat nuevo y pega el encargo de C-09.",ref:"Catálogo de producción, C-09."},
+{id:"T-33",c:"pend",t:"Producir el agradecimiento a quien refiere",emb:"Referidos",fase:"Cierre",r:"Ángela",f:"15 sep",
+ obj:"Que quien ha traído a otra familia note que se le agradece.",dep:"Necesita saber qué se da (T-03).",falta:"—",
+ paso:"Ángela abre un chat nuevo y pega el encargo de C-10.",ref:"Catálogo de producción, C-10."},
+{id:"T-34",c:"pend",t:"Producir el aviso previo de la jornada",emb:"Jornadas",fase:"Aviso previo",r:"Ángela",f:"12 sep",
+ obj:"Que la familia sepa que su hijo va a probar actividades.",dep:"Necesita jornadas cerradas (T-38).",falta:"—",
+ paso:"Lo firma el colegio, no Proeduco. Ángela pega el encargo de C-19.",ref:"Catálogo de producción, C-19."},
+{id:"T-35",c:"pend",t:"Producir el tríptico de la jornada",emb:"Jornadas",fase:"Jornada",r:"Ángela",f:"12 sep",
+ obj:"Que el niño lo lleve a casa y el padre se registre.",
+ dep:"Necesita las bases del sorteo (T-06) y los QR (T-09).",falta:"—",
+ paso:"Es papel: aquí sí va el QR, grande y visible.",ref:"Catálogo de producción, C-20."},
+{id:"T-36",c:"pend",t:"Producir la invitación a la primera clase",emb:"Colegios",fase:"Invitación",r:"Ángela",f:"20 sep",
+ obj:"Llenar el grupo con quien no se decidió a tiempo.",dep:"Necesita la oferta cerrada (T-02).",falta:"—",
+ paso:"Dos versiones: la nota de papel y el mensaje del grupo.",ref:"Catálogo de producción, C-15."},
+{id:"T-37",c:"pend",t:"Producir el cierre de jornada con fotos",emb:"Jornadas",fase:"Cierre",r:"Ángela",f:"Tras cada jornada",
+ obj:"Enseñar cómo fue y empujar a la inscripción.",
+ dep:"Necesita la autorización de imagen (T-05) y las fotos del día.",falta:"—",
+ paso:"Se monta con fotos de ese colegio, nunca de otro.",ref:"Catálogo de producción, C-21."},
+{id:"T-38",c:"pend",t:"Cerrar fechas de jornada con los colegios",emb:"Jornadas",fase:"Propuesta",r:"Leo",f:"8-12 sep",
+ obj:"Conseguir que acepten la jornada y fijar el día.",
+ dep:"Necesita el correo y el guion (T-17, T-18, T-19).",falta:"—",
+ paso:"Leo envía el correo, llama a las 72 horas y cierra fecha.",ref:"Mapa de embudos, embudo 6."},
+{id:"T-39",c:"pend",t:"Producir los recordatorios de plazo",emb:"Jornadas",fase:"Plazo",r:"Ángela",f:"20 sep",
+ obj:"Cerrar las inscripciones antes de que se enfríe.",dep:"Ninguna.",falta:"—",
+ paso:"Son dos mensajes, no uno. Ángela pega el encargo de C-22.",ref:"Catálogo de producción, C-22."},
+{id:"T-40",c:"pend",t:"Producir la plantilla de publicaciones",emb:"Transversal",fase:"Autoridad",r:"Ángela",f:"20 sep",
+ obj:"Una plantilla que se reutilice cada semana cambiando texto y foto.",
+ dep:"Necesita el calendario (T-22).",falta:"—",
+ paso:"Ángela pide al agente que la cree en Canva con la conexión.",ref:"Catálogo de producción, C-25."},
+{id:"T-41",c:"pend",t:"Producir la petición de reseña",emb:"Transversal",fase:"Autoridad",r:"Ángela",f:"30 sep",
+ obj:"Pedir la reseña cuando la familia está contenta, no al final de curso.",dep:"Ninguna.",falta:"—",
+ paso:"Tres versiones para tres momentos. Ángela pega el encargo de C-27.",ref:"Catálogo de producción, C-27."},
+{id:"T-42",c:"pend",t:"Enviar la circular de apertura",emb:"Renovación",fase:"Apertura",r:"Ana",f:"1 sep",
+ obj:"Arrancar la campaña de renovación.",
+ dep:"Necesita la pieza (T-24), el formulario publicado (T-07) y el listado (T-12).",falta:"—",
+ paso:"Ana envía por WhatsApp y duplica por correo. Anota cuántas familias recibieron.",ref:"Mapa de embudos, embudo 1, fase 2."},
+{id:"T-43",c:"pend",t:"Enviar el mensaje a antiguos alumnos",emb:"Antiguos alumnos",fase:"Reapertura",r:"Ana",f:"2 sep",
+ obj:"Reabrir la conversación.",dep:"Necesita la pieza (T-15) y el listado (T-13).",falta:"—",
+ paso:"Ana envía y anota cuántas familias recibieron.",ref:"Mapa de embudos, embudo 4, fase 2."},
+{id:"T-44",c:"pend",t:"Enviar el recordatorio de la ventana",emb:"Renovación",fase:"Refuerzo",r:"Ana",f:"6 sep",
+ obj:"Segundo impacto, solo a quien no ha renovado.",dep:"Necesita la pieza (T-25).",falta:"—",
+ paso:"Ana filtra a quien ya renovó y envía al resto.",ref:"Mapa de embudos, embudo 1, fase 3."},
+{id:"T-45",c:"pend",t:"Enviar el aviso de último día",emb:"Renovación",fase:"Cierre",r:"Ana",f:"14 sep",
+ obj:"Último aviso antes de la subida.",dep:"Necesita la pieza (T-26).",falta:"—",
+ paso:"Ana envía solo a quien sigue sin renovar.",ref:"Mapa de embudos, embudo 1, fase 4."},
+{id:"T-46",c:"pend",t:"Repartir carteles en los colegios",emb:"Colegios",fase:"Difusión",r:"Leo",f:"8-12 sep",
+ obj:"Que el cartel llegue a las familias del centro.",dep:"Necesita los carteles (T-29).",falta:"—",
+ paso:"Leo entrega a dirección, coloca el cartel físico y pide el reenvío al grupo.",ref:"Mapa de embudos, embudo 5, fase 3."},
+{id:"T-47",c:"pend",t:"Montar las jornadas en los colegios",emb:"Jornadas",fase:"Jornada",r:"Leo",f:"15-30 sep",
+ obj:"Que los niños prueben las actividades y las pidan en casa.",
+ dep:"Necesita fechas cerradas (T-38) y el tríptico (T-35).",falta:"—",
+ paso:"Leo monta el circuito, reparte trípticos y hace fotos. Anota cuántos alumnos pasaron.",ref:"Mapa de embudos, embudo 6, fase 4."},
+{id:"T-48",c:"pend",t:"Contactar con colegios nuevos",emb:"Colegios nuevos",fase:"Apertura",r:"Leo",f:"15-30 sep",
+ obj:"Abrir centros para el curso que viene.",dep:"Necesita el correo de prospección.",falta:"—",
+ paso:"Leo envía el correo, registra el envío y llama a las 72 horas.",ref:"Catálogo de producción, C-23."},
+{id:"T-49",c:"pend",t:"Llamar a las familias que no han renovado",emb:"Renovación",fase:"Rescate",r:"Ana",f:"30 sep",
+ obj:"Recuperar lo que se pueda y saber por qué se han ido.",dep:"Necesita el guion (T-21).",falta:"—",
+ paso:"Ana llama una a una y anota el motivo de cada baja.",ref:"Mapa de embudos, embudo 1, fase 6."},
+{id:"T-50",c:"pend",t:"Responder las preguntas del taller",emb:"Talleres",fase:"Definición",r:"Pedro",f:"Sin fecha",
+ obj:"Sin esas respuestas el taller no existe como servicio y no se puede preparar nada.",
+ dep:"Están enviadas por correo.",falta:"—",
+ paso:"Responder al menos las ocho marcadas como más urgentes.",ref:"Correo de preguntas del taller. Desbloquea toda la fase 2."},
+
+/* ---- GOBIERNO, recurrentes ---- */
+{id:"T-51",c:"pend",t:"Revisión diaria de la cola de registros",emb:"Gobierno",fase:"Seguimiento",r:"Ana",f:"Cada día desde el 1 sep",
+ obj:"Que ningún registro pase más de 48 horas sin que alguien lo contacte.",dep:"Ninguna.",falta:"—",
+ paso:"Diez minutos: mirar los registros nuevos y los que llevan más de dos días parados.",ref:"Documento de gobierno, apartado 6."},
+{id:"T-52",c:"pend",t:"Revisión semanal de la campaña",emb:"Gobierno",fase:"Seguimiento",r:"Ana",f:"Todos los lunes",
+ obj:"Ver qué está funcionando, corregir lo que no y repartir el trabajo de la semana.",
+ dep:"Ninguna.",falta:"—",
+ paso:"Media hora, los tres, con la hoja delante y la lista de nueve puntos.",ref:"Documento de gobierno, apartado 7."},
+{id:"T-53",c:"pend",t:"Lectura de cierre de campaña",emb:"Gobierno",fase:"Cierre",r:"Pedro",f:"31 oct",
+ obj:"Cerrar la campaña con los números reales y decidir qué se repite en febrero.",
+ dep:"Necesita que se haya medido durante toda la campaña.",falta:"—",
+ paso:"Una hora, todo el equipo. Es la reunión que convierte esta campaña en la línea base de la siguiente.",ref:"Documento de gobierno, apartado 6."},
+
+/* ---- POR VALIDAR ---- */
+{id:"T-54",c:"val",t:"Ficha del taller, a la espera de respuestas",emb:"Talleres",fase:"Definición",r:"Pedro",f:"Sin fecha",
+ obj:"Recoge lo que ya está decidido del taller. Le faltan los datos que solo Proeduco tiene.",
+ dep:"Necesita las respuestas de T-50.",falta:"—",
+ paso:"Revisar que lo recogido es correcto y responder las preguntas pendientes.",ref:"Ficha de servicio del taller."},
+
+/* ---- TERMINADAS ---- */
+{id:"T-55",c:"fin",t:"Mapa de embudos",emb:"Todos",fase:"Diseño",r:"Nevada & Amurai",f:"Entregado",
+ obj:"Qué queremos conseguir y cuál es el recorrido de cada familia.",dep:"—",falta:"—",
+ paso:"Usarlo como referencia cuando haya dudas sobre el porqué de una acción.",ref:"Documento «Mapa de embudos»."},
+{id:"T-56",c:"fin",t:"Catálogo de producción",emb:"Todos",fase:"Diseño",r:"Nevada & Amurai",f:"Entregado",
+ obj:"Qué materiales hacen falta y cómo se piden al agente.",dep:"—",falta:"—",
+ paso:"Abrirlo cada vez que haya que producir algo.",ref:"Documento «Plan de producción comercial»."},
+{id:"T-57",c:"fin",t:"Gobierno y seguimiento",emb:"Gobierno",fase:"Diseño",r:"Nevada & Amurai",f:"Entregado",
+ obj:"Qué se mide, quién lo mira y cuándo.",dep:"—",falta:"—",
+ paso:"Consultarlo en la revisión de los lunes.",ref:"Documento «Gobierno del sistema comercial»."}
+];
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+var tablero=document.getElementById("tablero");
+var refs={};
+COLS.forEach(function(c){
+  var d=document.createElement("div");
+  d.className="col"+(c.k==="bloq"?" col--bloq":"");
+  d.innerHTML='<div class="col__cab"><h3>'+esc(c.n)+'</h3><span class="col__n" id="n-'+c.k+'">0</span></div>'+
+    '<div class="col__lista" id="l-'+c.k+'"></div>';
+  tablero.appendChild(d);
+  refs[c.k]=d;
+});
+
+var tarjetas=[];
+T.forEach(function(x){
+  var cont=document.getElementById("l-"+x.c);
+  var b=document.createElement("button");
+  b.type="button"; b.className="tarjeta"; b.dataset.r=x.r; b.dataset.id=x.id;
+  var sinFecha=(x.f==="Sin fecha"||x.f==="Entregado");
+  b.innerHTML='<span class="tarjeta__sup"><span class="tarjeta__id">'+esc(x.id)+'</span>'+
+    '<span class="tarjeta__f'+(sinFecha?' tarjeta__f--sin':'')+'">'+esc(x.f)+'</span></span>'+
+    '<span class="tarjeta__t">'+esc(x.t)+'</span>'+
+    '<span class="tarjeta__pie"><span class="tarjeta__r">'+esc(x.r)+'</span>'+
+    '<span class="tarjeta__emb">'+esc(x.emb)+'</span></span>';
+  cont.appendChild(b);
+  tarjetas.push({el:b,d:x});
+});
+
+var ficha=document.getElementById("ficha"), caja=document.getElementById("ficha-caja");
+function abrir(x){
+  var campos=[
+    ["Embudo",x.emb],["Fase",x.fase],
+    ["Responsable",x.r],["Fecha o prioridad",x.f],
+    ["Para qué sirve",x.obj,true],
+    ["De qué depende",x.dep,true]
+  ];
+  if(x.falta!=="—") campos.push(["Qué falta para desbloquearla",x.falta,true]);
+  var h='<div class="ficha__cab"><div><span class="label">'+esc(x.id)+'</span><h3>'+esc(x.t)+'</h3></div>'+
+    '<button class="cerrar" type="button" id="cerrar" aria-label="Cerrar">✕</button></div><div class="ficha__campos">';
+  campos.forEach(function(c){
+    h+='<div class="campo'+(c[2]?' campo--ancho':'')+'"><b>'+esc(c[0])+'</b><p>'+esc(c[1])+'</p></div>';
+  });
+  h+='<div class="campo campo--ancho campo--paso"><b>Próximo paso</b><p>'+esc(x.paso)+'</p></div>'+
+     '<div class="campo campo--ancho"><b>Dónde está la información</b><p>'+esc(x.ref)+'</p></div></div>';
+  caja.innerHTML=h;
+  ficha.hidden=false;
+  var c=document.getElementById("cerrar");
+  if(c) c.addEventListener("click",cerrar);
+}
+function cerrar(){ ficha.hidden=true; }
+ficha.addEventListener("click",function(e){ if(e.target===ficha) cerrar(); });
+document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrar(); });
+tarjetas.forEach(function(t){ t.el.addEventListener("click",function(){ abrir(t.d); }); });
+
+var filtros=Array.prototype.slice.call(document.querySelectorAll(".filtro"));
+var cnt=document.getElementById("cnt");
+function filtrar(f){
+  filtros.forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.f===f?"true":"false"); });
+  var total=0, porCol={};
+  COLS.forEach(function(c){ porCol[c.k]=0; });
+  tarjetas.forEach(function(t){
+    var ver=(f==="todas"||t.d.r.indexOf(f)>-1);
+    t.el.hidden=!ver;
+    if(ver){ total++; porCol[t.d.c]++; }
+  });
+  COLS.forEach(function(c){
+    var n=document.getElementById("n-"+c.k);
+    if(n) n.textContent=porCol[c.k];
+    var l=document.getElementById("l-"+c.k);
+    var v=l.querySelector(".col__vacia");
+    if(porCol[c.k]===0){
+      if(!v){ var p=document.createElement("p"); p.className="col__vacia"; p.textContent="Nada aquí"; l.appendChild(p); }
+    } else if(v){ v.parentNode.removeChild(v); }
+  });
+  cnt.textContent=total;
+}
+filtros.forEach(function(b){ b.addEventListener("click",function(){ filtrar(b.dataset.f); }); });
+filtrar("todas");
+})();
+</script>
+
+</html>
